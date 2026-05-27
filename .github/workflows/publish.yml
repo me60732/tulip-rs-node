@@ -111,8 +111,13 @@ jobs:
       - name: List downloaded artifacts
         run: ls -la artifacts/
 
-      # napi artifacts reads ./artifacts/*.node and creates ./npm/{platform}/
-      # directories, each with the binary and a generated package.json.
+      # Create the npm/{platform}/ directories and update package.json with
+      # optionalDependencies BEFORE napi artifacts tries to populate them.
+      - name: Prepare npm platform package directories
+        run: npx napi prepublish -t npm
+
+      # napi artifacts reads ./artifacts/*.node and copies each binary into
+      # the matching npm/{platform}/ directory created in the previous step.
       - name: Organise artifacts into npm platform packages
         run: npm run artifacts
 
