@@ -1,6 +1,6 @@
 {
-  "name": "@me60732/tulip-rs-node",
-  "version": "0.1.3",
+  "name": "tulip-rs-node",
+  "version": "0.1.5",
   "description": "Node.js native bindings for tulip_rs — Technical Analysis Library",
   "type": "module",
   "main": "index.js",

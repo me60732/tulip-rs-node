@@ -1,6 +1,6 @@
 # tulip-rs-node
 
-[![npm](https://img.shields.io/npm/v/%40me60732%2Ftulip-rs-node.svg)](https://www.npmjs.com/package/@me60732/tulip-rs-node)
+[![npm](https://img.shields.io/npm/v/tulip-rs-node.svg)](https://www.npmjs.com/package/tulip-rs-node)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-me60732.github.io-blue)](https://me60732.github.io/tulip_rs/)
 
@@ -31,7 +31,7 @@ Full API documentation: [me60732.github.io/tulip_rs](https://me60732.github.io/t
 ## Installation
 
 ```bash
-npm install @me60732/tulip-rs-node
+npm install tulip-rs-node
 ```
 
 > Prebuilt binaries are provided for Linux x64, macOS x64, and macOS arm64.
@@ -57,7 +57,7 @@ Every indicator lives on the `ti` namespace object and follows the same API —
 learn it once, use it everywhere.
 
 ```js
-import * as ti from '@me60732/tulip-rs-node';
+import * as ti from 'tulip-rs-node';
 
 const close = [81.59, 81.06, 82.87, 83.00, 83.61,
                83.15, 82.84, 83.99, 84.55, 84.36];
@@ -256,7 +256,7 @@ Examples are provided for every indicator under `examples/`.
 
 | Language | Status | Package |
 |---|---|---|
-| **Node.js** | ✅ Supported | [`@me60732/tulip-rs-node`](https://www.npmjs.com/package/@me60732/tulip-rs-node) (this repo) |
+| **Node.js** | ✅ Supported | [`tulip-rs-node`](https://www.npmjs.com/package/tulip-rs-node) (this repo) |
 | **Rust** | ✅ Native | [`tulip_rs`](https://github.com/me60732/tulip_rs) |
 | **Python** | ✅ Supported | [`tulip_rs_python`](https://github.com/me60732/tulip_rs_python) · `pip install tulip-rs` |
 | R | 🔜 Planned | — |
