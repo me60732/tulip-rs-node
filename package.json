@@ -1,5 +1,5 @@
 {
-  "name": "tulip-rs-node",
+  "name": "@me60732/tulip-rs-node",
   "version": "0.1.1",
   "description": "Node.js native bindings for tulip_rs — Technical Analysis Library",
   "type": "module",
@@ -42,5 +42,8 @@
     "src-ts/indicator.js",
     "src-ts/indicator.d.ts",
     "*.node"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
