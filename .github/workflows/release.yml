@@ -6,7 +6,6 @@ on:
       - "v*.*.*"
 
 jobs:
-  # ─── 1. Build native binaries on every target platform ───────────────────────
   build:
     name: Build — ${{ matrix.settings.target }}
     runs-on: ${{ matrix.settings.host }}
@@ -64,23 +63,18 @@ jobs:
           CARGO_NET_RETRY: "10"
           CARGO_HTTP_TIMEOUT: "60"
 
-      # ─── FIX: Rename artifacts into napi‑expected filenames ───────────────────
-      - name: Rename artifact for napi
+      # ─── FIX: Only rename macOS artifacts ─────────────────────────────────────
+      - name: Rename macOS artifacts
+        if: startsWith(matrix.settings.target, 'x86_64-apple-darwin') || startsWith(matrix.settings.target, 'aarch64-apple-darwin')
         shell: bash
         run: |
           for f in *.node; do
             case "${{ matrix.settings.target }}" in
-              x86_64-unknown-linux-gnu)
-                mv "$f" "index.linux-x64-gnu.node"
-                ;;
               x86_64-apple-darwin)
                 mv "$f" "index.darwin-x64.node"
                 ;;
               aarch64-apple-darwin)
                 mv "$f" "index.darwin-arm64.node"
-                ;;
-              x86_64-pc-windows-msvc)
-                mv "$f" "index.win32-x64-msvc.node"
                 ;;
             esac
           done
@@ -89,11 +83,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bindings-${{ matrix.settings.target }}
-          path: "index.*.node"
+          path: "*.node"
           if-no-files-found: error
           retention-days: 1
 
-  # ─── 2. Collect artifacts, publish platform packages, then main package ───────
   publish:
     name: Publish to npm
     needs: build
