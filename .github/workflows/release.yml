@@ -7,85 +7,47 @@ on:
 
 jobs:
   build:
-    name: Build — ${{ matrix.settings.target }}
-    runs-on: ${{ matrix.settings.host }}
+    name: Build — ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        settings:
-          - host: ubuntu-latest
+        include:
+          - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
 
-          - host: macos-latest
+          - os: macos-latest
             target: x86_64-apple-darwin
 
-          - host: macos-latest
+          - os: macos-latest
             target: aarch64-apple-darwin
 
-          - host: windows-latest
+          - os: windows-latest
             target: x86_64-pc-windows-msvc
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
-      - name: Install Rust nightly
-        uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          targets: ${{ matrix.settings.target }}
+          targets: ${{ matrix.target }}
 
-      - name: Cache Cargo registry + build
-        uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ matrix.settings.target }}-cargo-publish
+      - uses: Swatinem/rust-cache@v2
 
-      - name: Configure git credentials for Cargo
-        run: git config --global url."https://x-access-token:${{ secrets.GH_PAT || github.token }}@github.com/".insteadOf "https://github.com/"
+      - run: npm ci
 
-      - name: Fetch Cargo dependencies
-        run: cargo fetch
-        env:
-          CARGO_NET_RETRY: "10"
-          CARGO_HTTP_TIMEOUT: "60"
+      - name: Build native addon
+        run: npx napi build --platform --release --target ${{ matrix.target }}
 
-      - name: Install npm dependencies
-        run: npm ci
-
-      - name: Build native binding
-        run: npx napi build --platform --release --target ${{ matrix.settings.target }}
-        env:
-          CARGO_NET_RETRY: "10"
-          CARGO_HTTP_TIMEOUT: "60"
-
-      # ─── FIX: Only rename macOS artifacts ─────────────────────────────────────
-      - name: Rename macOS artifacts
-        if: startsWith(matrix.settings.target, 'x86_64-apple-darwin') || startsWith(matrix.settings.target, 'aarch64-apple-darwin')
-        shell: bash
-        run: |
-          for f in *.node; do
-            case "${{ matrix.settings.target }}" in
-              x86_64-apple-darwin)
-                mv "$f" "index.darwin-x64.node"
-                ;;
-              aarch64-apple-darwin)
-                mv "$f" "index.darwin-arm64.node"
-                ;;
-            esac
-          done
-
-      - name: Upload native artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bindings-${{ matrix.settings.target }}
+          name: ${{ matrix.target }}
           path: "*.node"
-          if-no-files-found: error
-          retention-days: 1
 
   publish:
     name: Publish to npm
@@ -96,46 +58,22 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
           registry-url: "https://registry.npmjs.org"
 
-      - name: Install npm dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Download all platform artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          path: .
           merge-multiple: true
 
-      - name: List downloaded artifacts
-        run: ls -la artifacts/
+      - name: List artifacts
+        run: ls -la
 
-      - name: Prepare npm platform package directories
-        run: npx napi prepublish -t npm --skip-gh-release
-
-      - name: Organise artifacts into npm platform packages
-        run: npm run artifacts
-
-      - name: List generated npm platform packages
-        run: ls -la npm/
-
-      - name: Build TypeScript
-        run: npm run build:ts
-
-      - name: Publish platform packages
-        run: |
-          for dir in npm/*/; do
-            echo "Publishing $dir ..."
-            npm publish "$dir" --access public
-          done
-
-      - name: Publish main package
+      - name: Publish
         run: npm publish --access public
