@@ -53,6 +53,14 @@ jobs:
       - name: Configure git credentials for Cargo
         run: git config --global url."https://x-access-token:${{ secrets.GH_PAT || github.token }}@github.com/".insteadOf "https://github.com/"
 
+      # Pre-fetch all Cargo deps after credentials are configured so that
+      # transient crates.io DNS blips get retried here rather than mid-build.
+      - name: Fetch Cargo dependencies
+        run: cargo fetch
+        env:
+          CARGO_NET_RETRY: "10"
+          CARGO_HTTP_TIMEOUT: "60"
+
       - name: Install npm dependencies
         run: npm ci
 
@@ -60,6 +68,9 @@ jobs:
       # cargo cross-compiles when host != target (x86_64 on Apple Silicon).
       - name: Build native binding
         run: npm run build:native -- --target ${{ matrix.settings.target }}
+        env:
+          CARGO_NET_RETRY: "10"
+          CARGO_HTTP_TIMEOUT: "60"
 
       - name: Upload native artifact
         uses: actions/upload-artifact@v4
