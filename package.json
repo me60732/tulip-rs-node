@@ -1,0 +1,44 @@
+{
+  "name": "tulip-rs-node",
+  "version": "0.1.0",
+  "description": "Node.js native bindings for tulip_rs — Technical Analysis Library",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/me60732/tulip_rs_node"
+  },
+  "engines": {
+    "node": ">= 18"
+  },
+  "napi": {
+    "binaryName": "tulip_rs_node",
+    "targets": [
+      "x86_64-unknown-linux-gnu",
+      "x86_64-apple-darwin",
+      "aarch64-apple-darwin",
+      "x86_64-pc-windows-msvc"
+    ]
+  },
+  "scripts": {
+    "build": "napi build --platform --release --js binding.js --dts binding.d.ts && tsc",
+    "build:debug": "napi build --platform --js binding.js --dts binding.d.ts && tsc",
+    "build:native": "napi build --platform --release --js binding.js --dts binding.d.ts",
+    "build:native:debug": "napi build --platform --js binding.js --dts binding.d.ts",
+    "build:ts": "tsc",
+    "prepublishOnly": "napi prepublish -t npm",
+    "artifacts": "napi artifacts"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^2",
+    "@types/node": "^20",
+    "typescript": "^5"
+  },
+  "files": [
+    "binding.js",
+    "index.js",
+    "index.d.ts",
+    "*.node"
+  ]
+}

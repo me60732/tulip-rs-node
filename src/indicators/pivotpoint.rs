@@ -1,0 +1,112 @@
+use napi::bindgen_prelude::*;
+use napi::{Env, JsObject};
+use napi_derive::napi;
+use tulip_rs::indicator_types::TIndicatorState as _;
+use tulip_rs::indicators::pivotpoint as rust_pivotpoint;
+
+use crate::utils::{info_to_object, js_pair, map_error, InfoObject};
+
+const IW: usize = rust_pivotpoint::INPUTS_WIDTH;
+const OW: usize = rust_pivotpoint::OPTIONS_WIDTH;
+
+// ── State class ──────────────────────────────────────────────────────────────
+
+#[napi]
+pub struct PivotpointState {
+    pub(crate) inner: rust_pivotpoint::IndicatorState,
+}
+
+#[napi]
+impl PivotpointState {
+    /// Continue streaming: feed new bars into an existing state.
+    #[napi]
+    pub fn batch_indicator(&mut self, inputs: Vec<Vec<f64>>) -> Result<Vec<Vec<f64>>> {
+        let input_arr: [&[f64]; IW] = inputs
+            .iter()
+            .map(|v| v.as_slice())
+            .collect::<Vec<_>>()
+            .try_into()
+            .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
+        self.inner
+            .batch_indicator(&input_arr, None)
+            .map_err(map_error)
+    }
+
+    /// Serialize state to a compact binary `Buffer` (bincode).
+    #[napi]
+    pub fn to_buffer(&self) -> Result<Buffer> {
+        bincode::serialize(&self.inner)
+            .map(Buffer::from)
+            .map_err(|e| Error::new(Status::GenericFailure, e.to_string()))
+    }
+
+    /// Restore state from a `Buffer` produced by `toBuffer()`.
+    #[napi(factory)]
+    pub fn from_buffer(buf: Buffer) -> Result<Self> {
+        bincode::deserialize::<rust_pivotpoint::IndicatorState>(buf.as_ref())
+            .map(|inner| Self { inner })
+            .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
+    }
+
+    /// Serialize state to a JSON string (human-readable, Python-interop).
+    #[napi]
+    pub fn to_json(&self) -> Result<String> {
+        serde_json::to_string(&self.inner)
+            .map_err(|e| Error::new(Status::GenericFailure, e.to_string()))
+    }
+
+    /// Restore state from a JSON string produced by `toJson()`.
+    #[napi(factory)]
+    pub fn from_json(json: String) -> Result<Self> {
+        serde_json::from_str::<rust_pivotpoint::IndicatorState>(&json)
+            .map(|inner| Self { inner })
+            .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
+    }
+}
+
+// ── Top-level functions ───────────────────────────────────────────────────────
+
+/// Run the PivotPoint indicator. Returns `[outputs, state]` as a JS array.
+/// `inputs`: `[[high, low, close]]`   `options`: indicator-specific options
+#[napi]
+pub fn pivotpoint_indicator(
+    env: Env,
+    inputs: Vec<Vec<f64>>,
+    options: Vec<f64>,
+) -> Result<JsObject> {
+    let input_arr: [&[f64]; IW] = inputs
+        .iter()
+        .map(|v| v.as_slice())
+        .collect::<Vec<_>>()
+        .try_into()
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
+
+    let option_arr: [f64; OW] = options
+        .try_into()
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
+
+    let (outputs, inner) =
+        rust_pivotpoint::indicator(&input_arr, &option_arr, None).map_err(map_error)?;
+    js_pair(&env, outputs, PivotpointState { inner })
+}
+
+/// Static metadata for PivotPoint.
+#[napi]
+pub fn pivotpoint_info() -> InfoObject {
+    info_to_object(rust_pivotpoint::info())
+}
+
+/// Minimum number of input bars needed to produce at least one output bar.
+#[napi]
+pub fn pivotpoint_min_data(options: Vec<f64>) -> u32 {
+    rust_pivotpoint::min_data(&options) as u32
+}
+
+
+/// Minimum input bars needed to achieve a given decimal accuracy.
+#[napi]
+pub fn pivotpoint_min_data_accuracy(options: Vec<f64>, decimals: u32) -> u32 {
+    rust_pivotpoint::min_data_accuracy(&options, decimals as usize) as u32
+}
+
+// pivotpoint does not expose simd_by_assets (not present in tulip_rs for this indicator)

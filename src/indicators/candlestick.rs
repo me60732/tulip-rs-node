@@ -1,0 +1,145 @@
+use napi::bindgen_prelude::*;
+use napi::{Env, JsObject};
+use napi_derive::napi;
+use tulip_rs::candle_indicators::candle_patterns::CandlePattern;
+use tulip_rs::indicators::candlestick as rust_cdl;
+
+use crate::utils::{info_to_object, js_pair, map_error, InfoObject};
+
+const IW: usize = rust_cdl::INPUTS_WIDTH;
+const OW: usize = rust_cdl::OPTIONS_WIDTH;
+
+// ── Pattern output type ───────────────────────────────────────────────────────
+
+/// A single detected candlestick pattern on a bar.
+#[napi(object)]
+pub struct CandlePatternObject {
+    pub name: String,
+    pub full_name: String,
+    pub japanese_name: String,
+    pub bars: u32,
+    pub forecast: String,
+}
+
+fn pattern_to_object(p: CandlePattern) -> CandlePatternObject {
+    let info = p.get_info();
+    CandlePatternObject {
+        name: format!("{:?}", p),
+        full_name: info.full_name.to_string(),
+        japanese_name: info.japanese_name.to_string(),
+        bars: info.bars as u32,
+        forecast: format!("{:?}", info.forecast),
+    }
+}
+
+fn convert_patterns(raw: Vec<Option<Vec<CandlePattern>>>) -> Vec<Option<Vec<CandlePatternObject>>> {
+    raw.into_iter()
+        .map(|entry| entry.map(|ps| ps.into_iter().map(pattern_to_object).collect()))
+        .collect()
+}
+
+// ── State class ──────────────────────────────────────────────────────────────
+
+#[napi]
+pub struct CandlestickState {
+    pub(crate) inner: rust_cdl::IndicatorState,
+}
+
+#[napi]
+impl CandlestickState {
+    /// Continue streaming: feed new bars into an existing state.
+    /// Returns `Array<null | CandlePatternObject[]>` — one entry per output bar.
+    #[napi]
+    pub fn batch_indicator(
+        &mut self,
+        inputs: Vec<Vec<f64>>,
+    ) -> Result<Vec<Option<Vec<CandlePatternObject>>>> {
+        let input_arr: [&[f64]; IW] = inputs
+            .iter()
+            .map(|v| v.as_slice())
+            .collect::<Vec<_>>()
+            .try_into()
+            .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
+        let raw = self
+            .inner
+            .batch_indicator(&input_arr, None)
+            .map_err(map_error)?;
+        Ok(convert_patterns(raw))
+    }
+
+    /// Serialize state to a compact binary `Buffer` (bincode).
+    #[napi]
+    pub fn to_buffer(&self) -> Result<Buffer> {
+        bincode::serialize(&self.inner)
+            .map(Buffer::from)
+            .map_err(|e| Error::new(Status::GenericFailure, e.to_string()))
+    }
+
+    /// Restore state from a `Buffer` produced by `toBuffer()`.
+    #[napi(factory)]
+    pub fn from_buffer(buf: Buffer) -> Result<Self> {
+        bincode::deserialize::<rust_cdl::IndicatorState>(buf.as_ref())
+            .map(|inner| Self { inner })
+            .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
+    }
+
+    /// Serialize state to a JSON string.
+    #[napi]
+    pub fn to_json(&self) -> Result<String> {
+        serde_json::to_string(&self.inner)
+            .map_err(|e| Error::new(Status::GenericFailure, e.to_string()))
+    }
+
+    /// Restore state from a JSON string produced by `toJson()`.
+    #[napi(factory)]
+    pub fn from_json(json: String) -> Result<Self> {
+        serde_json::from_str::<rust_cdl::IndicatorState>(&json)
+            .map(|inner| Self { inner })
+            .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
+    }
+}
+
+// ── Top-level functions ───────────────────────────────────────────────────────
+
+/// Run the candlestick indicator. Returns `[patterns, state]` as a JS array.
+/// `inputs`:  `[open, high, low, close]`
+/// `options`: `[candle_period, trend_period, trend_signal_period]`
+/// Each element of `patterns` is `null` (no match) or an array of `CandlePatternObject`.
+#[napi]
+pub fn candlestick_indicator(
+    env: Env,
+    inputs: Vec<Vec<f64>>,
+    options: Vec<f64>,
+) -> Result<JsObject> {
+    let input_arr: [&[f64]; IW] = inputs
+        .iter()
+        .map(|v| v.as_slice())
+        .collect::<Vec<_>>()
+        .try_into()
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
+
+    let option_arr: [f64; OW] = options
+        .try_into()
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
+
+    let (raw_patterns, inner) =
+        rust_cdl::indicator(&input_arr, &option_arr, None).map_err(map_error)?;
+
+    let patterns = convert_patterns(raw_patterns);
+    js_pair(&env, patterns, CandlestickState { inner })
+}
+
+/// Static metadata for the candlestick indicator.
+#[napi]
+pub fn candlestick_info() -> InfoObject {
+    info_to_object(rust_cdl::info())
+}
+
+/// Minimum number of input bars needed to produce at least one output bar.
+#[napi]
+pub fn candlestick_min_data(options: Vec<f64>) -> u32 {
+    rust_cdl::min_data(&options) as u32
+}
+
+
+// candlestick does not expose min_data_accuracy (not present in tulip_rs for this indicator)
