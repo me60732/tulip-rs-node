@@ -74,13 +74,5 @@ jobs:
           path: .
           merge-multiple: true
 
-      - name: List artifacts
-        run: ls -la
-
-      - name: Show package name
-        run: node -p "require('./package.json').name"
-
       - name: Publish
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
