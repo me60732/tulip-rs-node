@@ -28,7 +28,7 @@
     "build:native": "napi build --platform --release --js binding.cjs --dts binding.d.cts",
     "build:native:debug": "napi build --platform --js binding.cjs --dts binding.d.cts",
     "build:ts": "tsc",
-    "prepublishOnly": "napi prepublish -t npm",
+    "prepublishOnly": "napi prepublish -t npm --skip-gh-release"
     "artifacts": "napi artifacts"
   },
   "devDependencies": {
