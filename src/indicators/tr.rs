@@ -20,7 +20,7 @@ pub struct TrState {
 impl TrState {
     /// Continue streaming: feed new bars into an existing state.
     #[napi]
-    pub fn batch_indicator(&mut self, inputs: Vec<Vec<f64>>) -> Result<Vec<Vec<f64>>> {
+    pub fn batch_indicator(&mut self, inputs: Vec<Vec<f64>>, optional_outputs: Option<Vec<bool>>) -> Result<Vec<Vec<f64>>> {
         let input_arr: [&[f64]; IW] = inputs
             .iter()
             .map(|v| v.as_slice())
@@ -28,7 +28,7 @@ impl TrState {
             .try_into()
             .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
         self.inner
-            .batch_indicator(&input_arr, None)
+            .batch_indicator(&input_arr, optional_outputs.as_deref())
             .map_err(map_error)
     }
 
@@ -69,7 +69,7 @@ impl TrState {
 /// Run the TR (True Range) indicator. Returns `[outputs, state]` as a JS array.
 /// `inputs`: `[[high, low, close]]`
 #[napi]
-pub fn tr_indicator(env: Env, inputs: Vec<Vec<f64>>) -> Result<JsObject> {
+pub fn tr_indicator(env: Env, inputs: Vec<Vec<f64>>, optional_outputs: Option<Vec<bool>>) -> Result<JsObject> {
     let input_arr: [&[f64]; IW] = inputs
         .iter()
         .map(|v| v.as_slice())
@@ -79,7 +79,7 @@ pub fn tr_indicator(env: Env, inputs: Vec<Vec<f64>>) -> Result<JsObject> {
 
     let option_arr: [f64; OW] = [];
 
-    let (outputs, inner) = rust_tr::indicator(&input_arr, &option_arr, None).map_err(map_error)?;
+    let (outputs, inner) = rust_tr::indicator(&input_arr, &option_arr, optional_outputs.as_deref()).map_err(map_error)?;
     js_pair(&env, outputs, TrState { inner })
 }
 
@@ -108,7 +108,7 @@ pub fn tr_min_data_accuracy(decimals: u32) -> u32 {
 /// Returns `[outputs, states]` — both JS arrays of length N.
 /// `inputs` shape: `[N][3][data_len]`
 #[napi]
-pub fn tr_simd_by_assets(env: Env, inputs: Vec<Vec<Vec<f64>>>) -> Result<JsObject> {
+pub fn tr_simd_by_assets(env: Env, inputs: Vec<Vec<Vec<f64>>>, optional_outputs: Option<Vec<bool>>) -> Result<JsObject> {
     let n = inputs.len();
     if !matches!(n, 2 | 4 | 8 | 16) {
         return Err(Error::new(
@@ -142,25 +142,25 @@ pub fn tr_simd_by_assets(env: Env, inputs: Vec<Vec<Vec<f64>>>) -> Result<JsObjec
         2 => rust_tr::by_assets::indicator::<2>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         4 => rust_tr::by_assets::indicator::<4>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         8 => rust_tr::by_assets::indicator::<8>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         16 => rust_tr::by_assets::indicator::<16>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         _ => unreachable!(),

@@ -76,6 +76,29 @@ function main() {
     });
     console.log('\nSIMD by Options demonstration completed successfully!');
   } catch (e) { console.log(`SIMD by Options error: ${e}`); }
+
+  // ── Optional Outputs ─────────────────────────────────────────────────────
+  console.log('\n' + '='.repeat(60));
+  console.log('OPTIONAL OUTPUTS');
+  console.log('='.repeat(60));
+  // Available: 'short_sma', 'long_sma'
+  const _nBase = ti.vosc.info.outputs.length;
+  const _optNames = ti.vosc.info.optionalOutputs;
+  console.log(`Optional outputs: ${_optNames.join(', ')}`);
+  console.log();
+
+  // Enable all optional outputs
+  const [_allOut] = ti.vosc.indicator([volume], options, _optNames.map(() => true));
+  console.log('All optional outputs enabled:');
+  _optNames.forEach((n, i) => {
+    console.log(`  ${n}: ${_allOut[_nBase + i]}`);
+  });
+
+  // Enable only the first optional output
+  const [_firstOut] = ti.vosc.indicator([volume], options, _optNames.map((_, i) => i === 0));
+  console.log(`\nOnly '${_optNames[0]}' enabled:`);
+  console.log(`  ${_optNames[0]}: ${_firstOut[_nBase]}`);
+  console.log(`  long_sma: [] (not requested)`);
 }
 
 main();

@@ -20,7 +20,7 @@ pub struct StddevState {
 impl StddevState {
     /// Continue streaming: feed new bars into an existing state.
     #[napi]
-    pub fn batch_indicator(&mut self, inputs: Vec<Vec<f64>>) -> Result<Vec<Vec<f64>>> {
+    pub fn batch_indicator(&mut self, inputs: Vec<Vec<f64>>, optional_outputs: Option<Vec<bool>>) -> Result<Vec<Vec<f64>>> {
         let input_arr: [&[f64]; IW] = inputs
             .iter()
             .map(|v| v.as_slice())
@@ -28,7 +28,7 @@ impl StddevState {
             .try_into()
             .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
         self.inner
-            .batch_indicator(&input_arr, None)
+            .batch_indicator(&input_arr, optional_outputs.as_deref())
             .map_err(map_error)
     }
 
@@ -69,7 +69,7 @@ impl StddevState {
 /// Run the StdDev indicator. Returns `[outputs, state]` as a JS array.
 /// `inputs`: `[[close]]`   `options`: `[period]`
 #[napi]
-pub fn stddev_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>) -> Result<JsObject> {
+pub fn stddev_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optional_outputs: Option<Vec<bool>>) -> Result<JsObject> {
     let input_arr: [&[f64]; IW] = inputs
         .iter()
         .map(|v| v.as_slice())
@@ -82,7 +82,7 @@ pub fn stddev_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>) -> R
         .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
 
     let (outputs, inner) =
-        rust_stddev::indicator(&input_arr, &option_arr, None).map_err(map_error)?;
+        rust_stddev::indicator(&input_arr, &option_arr, optional_outputs.as_deref()).map_err(map_error)?;
     js_pair(&env, outputs, StddevState { inner })
 }
 
@@ -118,6 +118,7 @@ pub fn stddev_simd_by_assets(
     env: Env,
     inputs: Vec<Vec<Vec<f64>>>,
     options: Vec<f64>,
+    optional_outputs: Option<Vec<bool>>,
 ) -> Result<JsObject> {
     let n = inputs.len();
     if !matches!(n, 2 | 4 | 8 | 16) {
@@ -154,25 +155,25 @@ pub fn stddev_simd_by_assets(
         2 => rust_stddev::by_assets::indicator::<2>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         4 => rust_stddev::by_assets::indicator::<4>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         8 => rust_stddev::by_assets::indicator::<8>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         16 => rust_stddev::by_assets::indicator::<16>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         _ => unreachable!(),
@@ -195,6 +196,7 @@ pub fn stddev_simd_by_options(
     env: Env,
     inputs: Vec<Vec<f64>>,
     options_list: Vec<Vec<f64>>,
+    optional_outputs: Option<Vec<bool>>,
 ) -> Result<JsObject> {
     let n = options_list.len();
     if !matches!(n, 2 | 4 | 8 | 16) {
@@ -229,25 +231,25 @@ pub fn stddev_simd_by_options(
         2 => rust_stddev::by_options::indicator::<2>(
             &input_arr,
             option_refs.as_slice().try_into().unwrap(),
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         4 => rust_stddev::by_options::indicator::<4>(
             &input_arr,
             option_refs.as_slice().try_into().unwrap(),
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         8 => rust_stddev::by_options::indicator::<8>(
             &input_arr,
             option_refs.as_slice().try_into().unwrap(),
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         16 => rust_stddev::by_options::indicator::<16>(
             &input_arr,
             option_refs.as_slice().try_into().unwrap(),
-            None,
+            optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
         _ => unreachable!(),

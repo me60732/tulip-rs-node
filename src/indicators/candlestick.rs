@@ -2,12 +2,43 @@ use napi::bindgen_prelude::*;
 use napi::{Env, JsObject};
 use napi_derive::napi;
 use tulip_rs::candle_indicators::candle_patterns::CandlePattern;
+use tulip_rs::candle_indicators::types::ForecastType as RustForecastType;
 use tulip_rs::indicators::candlestick as rust_cdl;
 
 use crate::utils::{info_to_object, js_pair, map_error, InfoObject};
 
 const IW: usize = rust_cdl::INPUTS_WIDTH;
 const OW: usize = rust_cdl::OPTIONS_WIDTH;
+
+// ── ForecastType string enum ────────────────────────────────────────────────────
+
+/// Filter candlestick results by forecast direction.
+/// Pass as the optional third argument to `candlestickIndicator` or
+/// `CandlestickState.batchIndicator` to restrict output to one forecast class.
+#[napi(string_enum)]
+pub enum ForecastType {
+    BearishReversal,
+    BullishReversal,
+    BearishContinuation,
+    BullishContinuation,
+    BearishReversalOrContinuation,
+    BullishReversalOrContinuation,
+}
+
+fn to_rust_forecast(f: ForecastType) -> RustForecastType {
+    match f {
+        ForecastType::BearishReversal => RustForecastType::BearishReversal,
+        ForecastType::BullishReversal => RustForecastType::BullishReversal,
+        ForecastType::BearishContinuation => RustForecastType::BearishContinuation,
+        ForecastType::BullishContinuation => RustForecastType::BullishContinuation,
+        ForecastType::BearishReversalOrContinuation => {
+            RustForecastType::BearishReversalOrContinuation
+        }
+        ForecastType::BullishReversalOrContinuation => {
+            RustForecastType::BullishReversalOrContinuation
+        }
+    }
+}
 
 // ── Pattern output type ───────────────────────────────────────────────────────
 
@@ -53,6 +84,7 @@ impl CandlestickState {
     pub fn batch_indicator(
         &mut self,
         inputs: Vec<Vec<f64>>,
+        forecast_type: Option<ForecastType>,
     ) -> Result<Vec<Option<Vec<CandlePatternObject>>>> {
         let input_arr: [&[f64]; IW] = inputs
             .iter()
@@ -62,7 +94,7 @@ impl CandlestickState {
             .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
         let raw = self
             .inner
-            .batch_indicator(&input_arr, None)
+            .batch_indicator(&input_arr, forecast_type.map(to_rust_forecast))
             .map_err(map_error)?;
         Ok(convert_patterns(raw))
     }
@@ -110,6 +142,7 @@ pub fn candlestick_indicator(
     env: Env,
     inputs: Vec<Vec<f64>>,
     options: Vec<f64>,
+    forecast_type: Option<ForecastType>,
 ) -> Result<JsObject> {
     let input_arr: [&[f64]; IW] = inputs
         .iter()
@@ -123,7 +156,8 @@ pub fn candlestick_indicator(
         .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
 
     let (raw_patterns, inner) =
-        rust_cdl::indicator(&input_arr, &option_arr, None).map_err(map_error)?;
+        rust_cdl::indicator(&input_arr, &option_arr, forecast_type.map(to_rust_forecast))
+            .map_err(map_error)?;
 
     let patterns = convert_patterns(raw_patterns);
     js_pair(&env, patterns, CandlestickState { inner })
@@ -140,6 +174,5 @@ pub fn candlestick_info() -> InfoObject {
 pub fn candlestick_min_data(options: Vec<f64>) -> u32 {
     rust_cdl::min_data(&options) as u32
 }
-
 
 // candlestick does not expose min_data_accuracy (not present in tulip_rs for this indicator)

@@ -75,6 +75,29 @@ function main() {
     });
     console.log('\nSIMD by Options demonstration completed successfully!');
   } catch (e) { console.log(`SIMD by Options error: ${e}`); }
+
+  // ── Optional Outputs ─────────────────────────────────────────────────────
+  console.log('\n' + '='.repeat(60));
+  console.log('OPTIONAL OUTPUTS');
+  console.log('='.repeat(60));
+  // Available: 'atr', 'tr'
+  const _nBase = ti.natr.info.outputs.length;
+  const _optNames = ti.natr.info.optionalOutputs;
+  console.log(`Optional outputs: ${_optNames.join(', ')}`);
+  console.log();
+
+  // Enable all optional outputs
+  const [_allOut] = ti.natr.indicator([high, low, close], options, _optNames.map(() => true));
+  console.log('All optional outputs enabled:');
+  _optNames.forEach((n, i) => {
+    console.log(`  ${n}: ${_allOut[_nBase + i]}`);
+  });
+
+  // Enable only the first optional output
+  const [_firstOut] = ti.natr.indicator([high, low, close], options, _optNames.map((_, i) => i === 0));
+  console.log(`\nOnly '${_optNames[0]}' enabled:`);
+  console.log(`  ${_optNames[0]}: ${_firstOut[_nBase]}`);
+  console.log(`  tr: [] (not requested)`);
 }
 
 main();

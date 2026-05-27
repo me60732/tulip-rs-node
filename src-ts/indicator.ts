@@ -28,6 +28,7 @@ export class Indicator<S = unknown> {
   readonly indicator: (
     inputs: number[][],
     options: number[],
+    optionalOutputs?: boolean[],
   ) => [number[][], S];
 
   /** Minimum number of input bars required to produce at least one output bar. */
@@ -44,6 +45,7 @@ export class Indicator<S = unknown> {
   readonly simdByAssets: (
     inputs: number[][][],
     options: number[],
+    optionalOutputs?: boolean[],
   ) => [number[][][], S[]];
 
   /**
@@ -54,6 +56,7 @@ export class Indicator<S = unknown> {
   readonly simdByOptions?: (
     inputs: number[][],
     optionsList: number[][],
+    optionalOutputs?: boolean[],
   ) => [number[][][], S[]];
 
   /**

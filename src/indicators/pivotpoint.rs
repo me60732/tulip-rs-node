@@ -20,7 +20,7 @@ pub struct PivotpointState {
 impl PivotpointState {
     /// Continue streaming: feed new bars into an existing state.
     #[napi]
-    pub fn batch_indicator(&mut self, inputs: Vec<Vec<f64>>) -> Result<Vec<Vec<f64>>> {
+    pub fn batch_indicator(&mut self, inputs: Vec<Vec<f64>>, optional_outputs: Option<Vec<bool>>) -> Result<Vec<Vec<f64>>> {
         let input_arr: [&[f64]; IW] = inputs
             .iter()
             .map(|v| v.as_slice())
@@ -28,7 +28,7 @@ impl PivotpointState {
             .try_into()
             .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
         self.inner
-            .batch_indicator(&input_arr, None)
+            .batch_indicator(&input_arr, optional_outputs.as_deref())
             .map_err(map_error)
     }
 
@@ -73,6 +73,7 @@ pub fn pivotpoint_indicator(
     env: Env,
     inputs: Vec<Vec<f64>>,
     options: Vec<f64>,
+    optional_outputs: Option<Vec<bool>>,
 ) -> Result<JsObject> {
     let input_arr: [&[f64]; IW] = inputs
         .iter()
@@ -86,7 +87,7 @@ pub fn pivotpoint_indicator(
         .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
 
     let (outputs, inner) =
-        rust_pivotpoint::indicator(&input_arr, &option_arr, None).map_err(map_error)?;
+        rust_pivotpoint::indicator(&input_arr, &option_arr, optional_outputs.as_deref()).map_err(map_error)?;
     js_pair(&env, outputs, PivotpointState { inner })
 }
 
