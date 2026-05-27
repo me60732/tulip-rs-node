@@ -1,5 +1,6 @@
 target/
 node_modules/
+.md
 
 # napi-rs generated native binary
 *.node
