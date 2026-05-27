@@ -7,6 +7,51 @@ on:
 
 jobs:
   build:
+    name: Build — ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+
+          - os: macos-latest
+            target: x86_64-apple-darwin
+
+          - os: macos-latest
+            target: aarch64-apple-darwin
+
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+
+      - run: npm ci
+
+      - name: Build native addon
+        run: npx napi build --platform --release --target ${{ matrix.target }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: "*.node"
+
+  publish:
+    name: Publish to npm
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -18,9 +63,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: "https://registry.npmjs.org"
 
-      - uses: napi-rs/cli@v2
+      - run: npm ci
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
         with:
-          build: true
-          publish: true
-          package-name: tulip-rs-node
+          path: artifacts
+          merge-multiple: true
+
+      - name: Prepare npm packages
+        run: npx napi prepublish -t npm --skip-gh-release
+
+      - name: Organize artifacts
+        run: npm run artifacts
+
+      - name: Build TypeScript
+        run: npm run build:ts
+
+      - name: Publish platform packages
+        run: |
+          for dir in npm/*/; do
+            echo "Publishing $dir ..."
+            npm publish "$dir" --access public
+          done
+
+      - name: Publish main package
+        run: npm publish --access public
