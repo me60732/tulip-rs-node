@@ -6,49 +6,94 @@ on:
       - "v*.*.*"
 
 jobs:
+  # ─── 1. Build native binaries on every target platform ───────────────────────
   build:
-    name: Build — ${{ matrix.target }}
-    runs-on: ${{ matrix.os }}
+    name: Build — ${{ matrix.settings.target }}
+    runs-on: ${{ matrix.settings.host }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
+        settings:
+          - host: ubuntu-latest
             target: x86_64-unknown-linux-gnu
 
-          - os: macos-latest
+          - host: macos-latest
             target: x86_64-apple-darwin
 
-          - os: macos-latest
+          - host: macos-latest
             target: aarch64-apple-darwin
 
-          - os: windows-latest
+          - host: windows-latest
             target: x86_64-pc-windows-msvc
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - uses: dtolnay/rust-toolchain@nightly
+      - name: Install Rust nightly
+        uses: dtolnay/rust-toolchain@nightly
         with:
-          targets: ${{ matrix.target }}
+          targets: ${{ matrix.settings.target }}
 
-      - uses: Swatinem/rust-cache@v2
+      - name: Cache Cargo registry + build
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.settings.target }}-cargo-publish
 
-      - run: npm ci
+      - name: Configure git credentials for Cargo
+        run: git config --global url."https://x-access-token:${{ secrets.GH_PAT || github.token }}@github.com/".insteadOf "https://github.com/"
 
-      - name: Build native addon
-        run: npx napi build --platform --release --target ${{ matrix.target }}
+      - name: Fetch Cargo dependencies
+        run: cargo fetch
+        env:
+          CARGO_NET_RETRY: "10"
+          CARGO_HTTP_TIMEOUT: "60"
 
-      - name: Upload artifact
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build native binding
+        run: npx napi build --platform --release --target ${{ matrix.settings.target }}
+        env:
+          CARGO_NET_RETRY: "10"
+          CARGO_HTTP_TIMEOUT: "60"
+
+      # ─── FIX: Rename artifacts into napi‑expected filenames ───────────────────
+      - name: Rename artifact for napi
+        shell: bash
+        run: |
+          for f in *.node; do
+            case "${{ matrix.settings.target }}" in
+              x86_64-unknown-linux-gnu)
+                mv "$f" "index.linux-x64-gnu.node"
+                ;;
+              x86_64-apple-darwin)
+                mv "$f" "index.darwin-x64.node"
+                ;;
+              aarch64-apple-darwin)
+                mv "$f" "index.darwin-arm64.node"
+                ;;
+              x86_64-pc-windows-msvc)
+                mv "$f" "index.win32-x64-msvc.node"
+                ;;
+            esac
+          done
+
+      - name: Upload native artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.target }}
-          path: "*.node"
+          name: bindings-${{ matrix.settings.target }}
+          path: "index.*.node"
+          if-no-files-found: error
+          retention-days: 1
 
+  # ─── 2. Collect artifacts, publish platform packages, then main package ───────
   publish:
     name: Publish to npm
     needs: build
@@ -58,26 +103,36 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
           registry-url: "https://registry.npmjs.org"
 
-      - run: npm ci
+      - name: Install npm dependencies
+        run: npm ci
 
-      - name: Download artifacts
+      - name: Download all platform artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
           merge-multiple: true
 
-      - name: Prepare npm packages
+      - name: List downloaded artifacts
+        run: ls -la artifacts/
+
+      - name: Prepare npm platform package directories
         run: npx napi prepublish -t npm --skip-gh-release
 
-      - name: Organize artifacts
+      - name: Organise artifacts into npm platform packages
         run: npm run artifacts
+
+      - name: List generated npm platform packages
+        run: ls -la npm/
 
       - name: Build TypeScript
         run: npm run build:ts
