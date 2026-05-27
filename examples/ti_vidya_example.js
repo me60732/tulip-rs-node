@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the VIDYA indicator from tulip-rs-node.
  * VIDYA returns one output: VIDYA Line.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

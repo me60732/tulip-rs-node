@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the VOLATILITY indicator from tulip-rs-node.
  * VOLATILITY returns one output: Volatility Line.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

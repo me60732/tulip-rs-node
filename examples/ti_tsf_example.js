@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the TSF indicator from tulip-rs-node.
  * TSF returns one output: TSF Line.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

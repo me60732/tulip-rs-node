@@ -1,9 +1,8 @@
-"use strict";
 /**
  * Node.js example for the ULTOSC indicator from tulip-rs-node.
  * ULTOSC returns one output: Ultimate Oscillator Line.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const high = [

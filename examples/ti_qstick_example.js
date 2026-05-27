@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the QSTICK indicator from tulip-rs-node.
  * Qstick uses Open, Close inputs with a period option.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const open  = [81.85, 81.20, 81.55, 82.91, 83.10, 83.41, 82.71, 82.70, 84.20, 84.25, 84.03, 85.45, 86.18, 88.00, 87.60];

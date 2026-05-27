@@ -6,6 +6,7 @@ description = "Node.js native bindings for TulipRS — Technical Analysis Librar
 license = "MIT"
 authors = ["Mark Ellis <me60732@gmail.com>"]
 repository = "https://github.com/me60732/tulip_rs_node"
+documentation = "https://me60732.github.io/tulip_rs/"
 
 [lib]
 crate-type = ["cdylib"]

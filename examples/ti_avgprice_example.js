@@ -1,9 +1,8 @@
-"use strict";
 /**
  * Node.js example for the AVGPRICE indicator from tulip-rs-node.
  * AVGPRICE returns one output: Average Price Line.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const open = [

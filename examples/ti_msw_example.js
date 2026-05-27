@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the MSW indicator from tulip-rs-node.
  * MSW returns two outputs: Sine and Lead.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the PPO indicator from tulip-rs-node.
  * PPO returns one output: PPO Line.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

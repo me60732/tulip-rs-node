@@ -1,9 +1,8 @@
-"use strict";
 /**
  * Node.js example for the MARKETFI indicator from tulip-rs-node.
  * Market Facilitation Index uses High, Low, Volume inputs with no options.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const high = [

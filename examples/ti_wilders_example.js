@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the WILDERS indicator from tulip-rs-node.
  * WILDERS returns one output: Wilders Line.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

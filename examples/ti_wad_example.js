@@ -1,9 +1,8 @@
-"use strict";
 /**
  * Node.js example for the WAD indicator from tulip-rs-node.
  * WAD returns one output: WAD Line.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const high = [

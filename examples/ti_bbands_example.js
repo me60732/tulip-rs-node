@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the BBANDS indicator from tulip-rs-node.
  * BBANDS returns three outputs: Lower Band, Middle Band, Upper Band.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the TRIX indicator from tulip-rs-node.
  * TRIX returns one output: TRIX Line.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

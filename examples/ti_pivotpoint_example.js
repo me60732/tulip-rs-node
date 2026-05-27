@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Node.js example for the PIVOTPOINT indicator from tulip-rs-node.
  *
@@ -11,7 +10,7 @@
  * Output:  one array with 7 elements — the pivot levels for the most-recent
  *          complete period.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const high = [

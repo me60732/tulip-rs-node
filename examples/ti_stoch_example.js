@@ -1,5 +1,4 @@
-"use strict";
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const close = [

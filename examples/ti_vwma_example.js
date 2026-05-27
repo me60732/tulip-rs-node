@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the VWMA indicator from tulip-rs-node.
  * Volume Weighted Moving Average uses Close, Volume inputs with a period option.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close  = [81.59, 81.06, 82.87, 83.00, 83.61, 83.15, 82.84, 83.99, 84.55, 84.36, 85.53, 86.54, 86.89, 87.77, 87.29];

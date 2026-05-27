@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the ZLEMA indicator from tulip-rs-node.
  * ZLEMA returns one output: ZLEMA Line.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

@@ -1,9 +1,8 @@
-"use strict";
 /**
  * Node.js example for the NVI indicator from tulip-rs-node.
  * Negative Volume Index uses Close, Volume inputs with no options.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const close = [

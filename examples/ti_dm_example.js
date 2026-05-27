@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the DM indicator from tulip-rs-node.
  * DM (Directional Movement) returns two outputs: +DM and -DM.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const high = [82.15, 81.89, 83.03, 83.30, 83.85, 83.90, 83.33, 84.30, 84.84, 85.00, 85.90, 86.58, 86.98, 88.00, 87.87];

@@ -1,4 +1,3 @@
-'use strict';
 /**
  * Node.js example for the MOM indicator from tulip-rs-node.
  *
@@ -9,7 +8,7 @@
  * 4. SIMD by assets (4 assets simultaneously)
  * 5. SIMD by options (4 option sets simultaneously)
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

@@ -1,9 +1,8 @@
-"use strict";
 /**
  * Node.js example for the OBV indicator from tulip-rs-node.
  * On Balance Volume uses Close, Volume inputs with no options.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const close = [

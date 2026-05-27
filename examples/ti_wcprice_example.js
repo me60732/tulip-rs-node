@@ -1,9 +1,8 @@
-"use strict";
 /**
  * Node.js example for the WCPRICE indicator from tulip-rs-node.
  * WCPRICE returns one output: Weighted Close Price Line.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const high = [

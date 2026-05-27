@@ -3,7 +3,7 @@
  *
  * Every indicator is exposed as a namespaced `Indicator` instance:
  *
- *   const ti = require('tulip-rs-node');
+ *   import ti from 'tulip-rs-node';
  *
  *   const [outputs, state] = ti.sma.indicator([[...close]], [5]);
  *   console.log(ti.sma.info);
@@ -11,15 +11,15 @@
  *   const restored = ti.sma.State.fromBuffer(buf);
  *
  * Build sequence (Rust must compile before TypeScript):
- *   npm run build:native   →  compiles Rust, emits binding.js + binding.d.ts
+ *   npm run build:native   →  compiles Rust, emits binding.cjs + binding.d.cts
  *   npm run build:ts       →  compiles index.ts → index.js + index.d.ts
  *   npm run build          →  both in one step
  */
 
-import { Indicator } from "./src-ts/indicator";
+import { Indicator } from "./src-ts/indicator.js";
 
 export { Indicator };
-export type { IndicatorInfo } from "./src-ts/indicator";
+export type { IndicatorInfo } from "./src-ts/indicator.js";
 
 // ── Indicators ──────────────────────────────────────────────────────────────
 export const ad = new Indicator("ad");

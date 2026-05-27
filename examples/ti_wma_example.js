@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the WMA indicator from tulip-rs-node.
  * WMA returns one output: WMA Line.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

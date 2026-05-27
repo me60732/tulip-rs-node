@@ -1,9 +1,8 @@
-"use strict";
 /**
  * Node.js example for the EMV indicator from tulip-rs-node.
  * Ease of Movement uses High, Low, Volume inputs with no options.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const high = [

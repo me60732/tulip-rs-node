@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the APO indicator from tulip-rs-node.
  * APO returns one output: APO Line.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

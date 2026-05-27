@@ -1,11 +1,10 @@
-"use strict";
 /**
  * Node.js example for the AO indicator from tulip-rs-node.
  * Awesome Oscillator uses High, Low inputs with no options.
  * Note: AO requires at least 35 bars (5-period and 34-period SMAs);
  * the standard 15-bar data is therefore repeated to produce enough input.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const highBase = [

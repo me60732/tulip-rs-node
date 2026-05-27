@@ -1,4 +1,3 @@
-'use strict';
 /**
  * Node.js example for the Candlestick indicator from tulip-rs-node.
  *
@@ -10,7 +9,7 @@
  * 1. Basic candlestick pattern detection
  * 2. State continuation with new bar data
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   // Exact data from the Rust example (19 bars including pattern bars)

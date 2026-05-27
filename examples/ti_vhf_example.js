@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the VHF indicator from tulip-rs-node.
  * VHF returns one output: VHF Line.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [

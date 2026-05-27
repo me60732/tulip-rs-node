@@ -1,9 +1,8 @@
-"use strict";
 /**
  * Node.js example for the AD indicator from tulip-rs-node.
  * Accumulation/Distribution Line uses High, Low, Close, Volume inputs.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const close = [

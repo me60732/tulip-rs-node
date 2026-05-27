@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the VOSC indicator from tulip-rs-node.
  * Volume Oscillator uses a single Volume input with short and long period options.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const volume = [5653100, 6447400, 7690900, 3831400, 4455100, 3798000, 3936200, 4732000, 4841300, 3915300, 6830800, 6694100, 5293600, 7985800, 4807900];

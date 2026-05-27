@@ -1,9 +1,8 @@
-"use strict";
 /**
  * Node.js example for the BOP indicator from tulip-rs-node.
  * BOP returns one output: BOP Line.
  */
-const ti = require("../index");
+import * as ti from "../index.js";
 
 function main() {
   const open = [

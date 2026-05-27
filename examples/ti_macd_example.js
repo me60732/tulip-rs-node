@@ -1,9 +1,8 @@
-'use strict';
 /**
  * Node.js example for the MACD indicator from tulip-rs-node.
  * MACD returns three outputs: MACD Line, Signal Line, Histogram.
  */
-const ti = require('../index');
+import * as ti from '../index.js';
 
 function main() {
   const close = [
