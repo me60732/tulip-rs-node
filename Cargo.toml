@@ -23,4 +23,5 @@ tulip_rs    = { git = "https://github.com/me60732/tulip_rs.git", default-feature
 napi-build = "2"
 
 [profile.release]
-lto = true
+lto = "thin"       # fat LTO (true) adds 3-5x link time with minimal runtime gain for a binding
+codegen-units = 4  # default for release is 1; more units = faster compile, tiny perf trade-off
