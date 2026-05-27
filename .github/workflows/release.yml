@@ -42,13 +42,16 @@ jobs:
         run: npm ci
 
       - name: Build native addon
-        run: npx napi build --platform --release --target ${{ matrix.target }}
+        run: npx napi build --platform --release --target ${{ matrix.target }} --js binding.cjs --dts binding.d.cts
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}
-          path: "*.node"
+          path: |
+            *.node
+            binding.cjs
+            binding.d.cts
 
   publish:
     name: Publish to npm
@@ -63,8 +66,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
 
       - name: Install dependencies
         run: npm ci
@@ -74,5 +78,8 @@ jobs:
           path: .
           merge-multiple: true
 
+      - name: Compile TypeScript
+        run: npx tsc
+
       - name: Publish
-        run: npm publish --access public --provenance
+        run: npm publish --access public
