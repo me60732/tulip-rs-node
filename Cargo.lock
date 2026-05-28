@@ -245,8 +245,8 @@ dependencies = [
 
 [[package]]
 name = "tulip_rs"
-version = "0.1.6"
-source = "git+https://github.com/me60732/tulip_rs.git#96960de85e283da1eaf53a7c4d14cede5be6bb51"
+version = "0.1.8"
+source = "git+https://github.com/me60732/tulip_rs.git#49d83a750f7a5868f0d0edf78b4347470d31ff36"
 dependencies = [
  "serde",
  "serde_json",
@@ -257,7 +257,7 @@ dependencies = [
 [[package]]
 name = "tulip_rs_macros"
 version = "0.1.0"
-source = "git+https://github.com/me60732/tulip_rs.git#96960de85e283da1eaf53a7c4d14cede5be6bb51"
+source = "git+https://github.com/me60732/tulip_rs.git#49d83a750f7a5868f0d0edf78b4347470d31ff36"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -267,7 +267,7 @@ dependencies = [
 
 [[package]]
 name = "tulip_rs_node"
-version = "0.1.6"
+version = "0.1.8"
 dependencies = [
  "bincode",
  "napi",
@@ -281,7 +281,7 @@ dependencies = [
 [[package]]
 name = "tulip_rs_shared"
 version = "0.1.0"
-source = "git+https://github.com/me60732/tulip_rs.git#96960de85e283da1eaf53a7c4d14cede5be6bb51"
+source = "git+https://github.com/me60732/tulip_rs.git#49d83a750f7a5868f0d0edf78b4347470d31ff36"
 
 [[package]]
 name = "unicode-ident"

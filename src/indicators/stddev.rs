@@ -20,7 +20,11 @@ pub struct StddevState {
 impl StddevState {
     /// Continue streaming: feed new bars into an existing state.
     #[napi]
-    pub fn batch_indicator(&mut self, inputs: Vec<Vec<f64>>, optional_outputs: Option<Vec<bool>>) -> Result<Vec<Vec<f64>>> {
+    pub fn batch_indicator(
+        &mut self,
+        inputs: Vec<Vec<f64>>,
+        optional_outputs: Option<Vec<bool>>,
+    ) -> Result<Vec<Vec<f64>>> {
         let input_arr: [&[f64]; IW] = inputs
             .iter()
             .map(|v| v.as_slice())
@@ -69,7 +73,12 @@ impl StddevState {
 /// Run the StdDev indicator. Returns `[outputs, state]` as a JS array.
 /// `inputs`: `[[close]]`   `options`: `[period]`
 #[napi]
-pub fn stddev_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optional_outputs: Option<Vec<bool>>) -> Result<JsObject> {
+pub fn stddev_indicator(
+    env: Env,
+    inputs: Vec<Vec<f64>>,
+    options: Vec<f64>,
+    optional_outputs: Option<Vec<bool>>,
+) -> Result<JsObject> {
     let input_arr: [&[f64]; IW] = inputs
         .iter()
         .map(|v| v.as_slice())
@@ -82,7 +91,8 @@ pub fn stddev_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, opti
         .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
 
     let (outputs, inner) =
-        rust_stddev::indicator(&input_arr, &option_arr, optional_outputs.as_deref()).map_err(map_error)?;
+        rust_stddev::indicator(&input_arr, &option_arr, optional_outputs.as_deref())
+            .map_err(map_error)?;
     js_pair(&env, outputs, StddevState { inner })
 }
 
@@ -98,14 +108,10 @@ pub fn stddev_min_data(options: Vec<f64>) -> u32 {
     rust_stddev::min_data(&options) as u32
 }
 
-
 /// Minimum input bars needed to achieve a given decimal accuracy.
 #[napi]
-pub fn stddev_min_data_accuracy(options: Vec<f64>, decimals: u32) -> Result<u32> {
-    let arr: [f64; OW] = options
-        .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
-    Ok(rust_stddev::min_data_accuracy(&arr, decimals as usize) as u32)
+pub fn stddev_min_data_accuracy(options: Vec<f64>, decimals: u32) -> u32 {
+    rust_stddev::min_data_accuracy(&options, decimals as usize) as u32
 }
 
 // ── SIMD — by assets ─────────────────────────────────────────────────────────
