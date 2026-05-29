@@ -19,7 +19,7 @@ export declare class Indicator<S = unknown> {
     /** Static metadata — fetched once at construction, never changes. */
     readonly info: IndicatorInfo;
     /** Run the indicator on a batch of data. Returns `[outputs, state]`. */
-    readonly indicator: (inputs: number[][], options: number[]) => [number[][], S];
+    readonly indicator: (inputs: number[][], options: number[], optionalOutputs?: boolean[]) => [number[][], S];
     /** Minimum number of input bars required to produce at least one output bar. */
     readonly minData: (options: number[]) => number;
     /** Minimum input bars needed to achieve a given decimal accuracy. */
@@ -29,13 +29,13 @@ export declare class Indicator<S = unknown> {
      * N must be 2, 4, 8, or 16.
      * `inputs` shape: `[N][INPUTS_WIDTH][data_len]`
      */
-    readonly simdByAssets: (inputs: number[][][], options: number[]) => [number[][][], S[]];
+    readonly simdByAssets: (inputs: number[][][], options: number[], optionalOutputs?: boolean[]) => [number[][][], S[]];
     /**
      * SIMD — run N option-sets against the same asset data in a single pass.
      * N must be 2, 4, 8, or 16.
      * Absent (`undefined`) for indicators that have no options (OPTIONS_WIDTH === 0).
      */
-    readonly simdByOptions?: (inputs: number[][], optionsList: number[][]) => [number[][][], S[]];
+    readonly simdByOptions?: (inputs: number[][], optionsList: number[][], optionalOutputs?: boolean[]) => [number[][][], S[]];
     /**
      * The napi-rs State class for this indicator.
      * Use `ti.sma.State.fromBuffer(buf)` or `ti.sma.State.fromJson(json)` to restore state.

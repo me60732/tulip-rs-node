@@ -27,7 +27,7 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(", ")}`);
   console.log(`Minimum data required: ${ti.tr.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.tr.minDataAccuracy(6)}`,
+    `Minimum data for accuracy (6 decimals): ${ti.tr.minDataAccuracy([], 6)}`,
   );
   console.log();
 

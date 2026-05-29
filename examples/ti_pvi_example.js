@@ -26,20 +26,20 @@ function main() {
   if (info.optionalOutputs && info.optionalOutputs.length > 0) {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(", ")}`);
   }
-  console.log(`Minimum data required: ${ti.pvi.minData()}`);
+  console.log(`Minimum data required: ${ti.pvi.minData([])}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.pvi.minDataAccuracy(6)}`,
+    `Minimum data for accuracy (6 decimals): ${ti.pvi.minDataAccuracy([], 6)}`,
   );
   console.log();
 
-  const [outputs] = ti.pvi.indicator([close, volume]);
+  const [outputs] = ti.pvi.indicator([close, volume], []);
   console.log(`Full PVI Line: ${outputs[0]}`);
 
   const n = close.length - 5;
-  const [outputs2, state2] = ti.pvi.indicator([
-    close.slice(0, n),
-    volume.slice(0, n),
-  ]);
+  const [outputs2, state2] = ti.pvi.indicator(
+    [close.slice(0, n), volume.slice(0, n)],
+    [],
+  );
   console.log(`\nPartial PVI Line: ${outputs2[0]}`);
   console.log("\nDemonstrating state continuation...");
   console.log(
@@ -73,13 +73,13 @@ function main() {
     "Asset 1: Original data\nAsset 2: Scaled up (+20% values)\nAsset 3: Different upward trend\nAsset 4: Downward trend\n",
   );
   try {
-    const [simdOutputs] = ti.pvi.simdByAssets(simdInputs);
+    const [simdOutputs] = ti.pvi.simdByAssets(simdInputs, []);
     simdOutputs.forEach((output, i) =>
       console.log(`Asset ${i + 1} PVI values: ${output[0]}`),
     );
     console.log("\nVerification - calculating each asset individually:");
     simdInputs.forEach((inp, i) => {
-      const [o] = ti.pvi.indicator(inp);
+      const [o] = ti.pvi.indicator(inp, []);
       console.log(`Asset ${i + 1} individual: ${o[0]}`);
     });
     console.log("\nSIMD by Assets demonstration completed successfully!");

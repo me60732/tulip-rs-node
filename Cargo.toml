@@ -1,6 +1,6 @@
 [package]
 name = "tulip_rs_node"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 description = "Node.js native bindings for TulipRS — Technical Analysis Library"
 license = "MIT"

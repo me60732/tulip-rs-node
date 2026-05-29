@@ -32,23 +32,23 @@ function main() {
   if (info.optionalOutputs && info.optionalOutputs.length > 0) {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(", ")}`);
   }
-  console.log(`Minimum data required: ${ti.ao.minData()}`);
+  console.log(`Minimum data required: ${ti.ao.minData([])}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.ao.minDataAccuracy(6)}`,
+    `Minimum data for accuracy (6 decimals): ${ti.ao.minDataAccuracy([], 6)}`,
   );
   console.log(
     `Input length used: ${high.length} bars (standard 15-bar data × 3)`,
   );
   console.log();
 
-  const [outputs] = ti.ao.indicator([high, low]);
+  const [outputs] = ti.ao.indicator([high, low], []);
   console.log(`Full AO Line: ${outputs[0]}`);
 
   const n = high.length - 5;
-  const [outputs2, state2] = ti.ao.indicator([
-    high.slice(0, n),
-    low.slice(0, n),
-  ]);
+  const [outputs2, state2] = ti.ao.indicator(
+    [high.slice(0, n), low.slice(0, n)],
+    [],
+  );
   console.log(`\nPartial AO Line: ${outputs2[0]}`);
   console.log("\nDemonstrating state continuation...");
   console.log("State info: AO State - internal state for Awesome Oscillator");
@@ -80,13 +80,13 @@ function main() {
     "Asset 1: Original data\nAsset 2: Scaled up (+20% values)\nAsset 3: Different upward trend\nAsset 4: Downward trend\n",
   );
   try {
-    const [simdOutputs] = ti.ao.simdByAssets(simdInputs);
+    const [simdOutputs] = ti.ao.simdByAssets(simdInputs, []);
     simdOutputs.forEach((output, i) =>
       console.log(`Asset ${i + 1} AO values: ${output[0]}`),
     );
     console.log("\nVerification - calculating each asset individually:");
     simdInputs.forEach((inp, i) => {
-      const [o] = ti.ao.indicator(inp);
+      const [o] = ti.ao.indicator(inp, []);
       console.log(`Asset ${i + 1} individual: ${o[0]}`);
     });
     console.log("\nSIMD by Assets demonstration completed successfully!");
@@ -96,24 +96,32 @@ function main() {
   // No simdByOptions — indicator has no options
 
   // ── Optional Outputs ─────────────────────────────────────────────────────
-  console.log('\n' + '='.repeat(60));
-  console.log('OPTIONAL OUTPUTS');
-  console.log('='.repeat(60));
+  console.log("\n" + "=".repeat(60));
+  console.log("OPTIONAL OUTPUTS");
+  console.log("=".repeat(60));
   // Available: 'short_sma', 'long_sma', 'medprice'
   const _nBase = ti.ao.info.outputs.length;
   const _optNames = ti.ao.info.optionalOutputs;
-  console.log(`Optional outputs: ${_optNames.join(', ')}`);
+  console.log(`Optional outputs: ${_optNames.join(", ")}`);
   console.log();
 
   // Enable all optional outputs
-  const [_allOut] = ti.ao.indicator([high, low], options, _optNames.map(() => true));
-  console.log('All optional outputs enabled:');
+  const [_allOut] = ti.ao.indicator(
+    [high, low],
+    options,
+    _optNames.map(() => true),
+  );
+  console.log("All optional outputs enabled:");
   _optNames.forEach((n, i) => {
     console.log(`  ${n}: ${_allOut[_nBase + i]}`);
   });
 
   // Enable only the first optional output
-  const [_firstOut] = ti.ao.indicator([high, low], options, _optNames.map((_, i) => i === 0));
+  const [_firstOut] = ti.ao.indicator(
+    [high, low],
+    options,
+    _optNames.map((_, i) => i === 0),
+  );
   console.log(`\nOnly '${_optNames[0]}' enabled:`);
   console.log(`  ${_optNames[0]}: ${_firstOut[_nBase]}`);
   console.log(`  long_sma: [] (not requested)`);

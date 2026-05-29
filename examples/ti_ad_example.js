@@ -34,22 +34,20 @@ function main() {
   if (info.optionalOutputs && info.optionalOutputs.length > 0) {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(", ")}`);
   }
-  console.log(`Minimum data required: ${ti.ad.minData()}`);
+  console.log(`Minimum data required: ${ti.ad.minData([])}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.ad.minDataAccuracy(6)}`,
+    `Minimum data for accuracy (6 decimals): ${ti.ad.minDataAccuracy([], 6)}`,
   );
   console.log();
 
-  const [outputs] = ti.ad.indicator([high, low, close, volume]);
+  const [outputs] = ti.ad.indicator([high, low, close, volume], []);
   console.log(`Full AD Line: ${outputs[0]}`);
 
   const n = high.length - 5;
-  const [outputs2, state2] = ti.ad.indicator([
-    high.slice(0, n),
-    low.slice(0, n),
-    close.slice(0, n),
-    volume.slice(0, n),
-  ]);
+  const [outputs2, state2] = ti.ad.indicator(
+    [high.slice(0, n), low.slice(0, n), close.slice(0, n), volume.slice(0, n)],
+    [],
+  );
   console.log(`\nPartial AD Line: ${outputs2[0]}`);
   console.log("\nDemonstrating state continuation...");
   console.log(
@@ -97,13 +95,13 @@ function main() {
     "Asset 1: Original data\nAsset 2: Scaled up (+20% values)\nAsset 3: Different upward trend\nAsset 4: Downward trend\n",
   );
   try {
-    const [simdOutputs] = ti.ad.simdByAssets(simdInputs);
+    const [simdOutputs] = ti.ad.simdByAssets(simdInputs, []);
     simdOutputs.forEach((output, i) =>
       console.log(`Asset ${i + 1} AD values: ${output[0]}`),
     );
     console.log("\nVerification - calculating each asset individually:");
     simdInputs.forEach((inp, i) => {
-      const [o] = ti.ad.indicator(inp);
+      const [o] = ti.ad.indicator(inp, []);
       console.log(`Asset ${i + 1} individual: ${o[0]}`);
     });
     console.log("\nSIMD by Assets demonstration completed successfully!");

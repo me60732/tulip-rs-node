@@ -69,7 +69,7 @@ impl BopState {
 /// Run the BOP indicator. Returns `[outputs, state]` as a JS array.
 /// `inputs`: `[[open], [high], [low], [close]]`
 #[napi]
-pub fn bop_indicator(env: Env, inputs: Vec<Vec<f64>>, optional_outputs: Option<Vec<bool>>) -> Result<JsObject> {
+pub fn bop_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optional_outputs: Option<Vec<bool>>) -> Result<JsObject> {
     let input_arr: [&[f64]; IW] = inputs
         .iter()
         .map(|v| v.as_slice())
@@ -77,7 +77,9 @@ pub fn bop_indicator(env: Env, inputs: Vec<Vec<f64>>, optional_outputs: Option<V
         .try_into()
         .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
 
-    let option_arr: [f64; OW] = [];
+    let option_arr: [f64; OW] = options
+        .try_into()
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
 
     let (outputs, inner) = rust_bop::indicator(&input_arr, &option_arr, optional_outputs.as_deref()).map_err(map_error)?;
     js_pair(&env, outputs, BopState { inner })
@@ -91,15 +93,15 @@ pub fn bop_info() -> InfoObject {
 
 /// Minimum number of input bars needed to produce at least one output bar.
 #[napi]
-pub fn bop_min_data() -> u32 {
-    rust_bop::min_data(&[]) as u32
+pub fn bop_min_data(options: Vec<f64>) -> u32 {
+    rust_bop::min_data(&options) as u32
 }
 
 
 /// Minimum input bars needed to achieve a given decimal accuracy.
 #[napi]
-pub fn bop_min_data_accuracy(decimals: u32) -> u32 {
-    rust_bop::min_data_accuracy(&[], decimals as usize) as u32
+pub fn bop_min_data_accuracy(options: Vec<f64>, decimals: u32) -> u32 {
+    rust_bop::min_data_accuracy(&options, decimals as usize) as u32
 }
 
 // ── SIMD — by assets ─────────────────────────────────────────────────────────
@@ -108,7 +110,7 @@ pub fn bop_min_data_accuracy(decimals: u32) -> u32 {
 /// Returns `[outputs, states]` — both JS arrays of length N.
 /// `inputs` shape: `[N][4][data_len]`
 #[napi]
-pub fn bop_simd_by_assets(env: Env, inputs: Vec<Vec<Vec<f64>>>, optional_outputs: Option<Vec<bool>>) -> Result<JsObject> {
+pub fn bop_simd_by_assets(env: Env, inputs: Vec<Vec<Vec<f64>>>, options: Vec<f64>, optional_outputs: Option<Vec<bool>>) -> Result<JsObject> {
     let n = inputs.len();
     if !matches!(n, 2 | 4 | 8 | 16) {
         return Err(Error::new(
@@ -117,7 +119,9 @@ pub fn bop_simd_by_assets(env: Env, inputs: Vec<Vec<Vec<f64>>>, optional_outputs
         ));
     }
 
-    let option_arr: [f64; OW] = [];
+    let option_arr: [f64; OW] = options
+        .try_into()
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
 
     let asset_vecs: Vec<Vec<&[f64]>> = inputs
         .iter()
