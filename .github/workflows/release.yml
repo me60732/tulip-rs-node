@@ -36,6 +36,14 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      # Git for Windows ships its own tar.exe which hangs when rust-cache tries
+      # to save with zstd compression. Prepend System32 so the Windows-native
+      # BSD tar (libarchive) is found first instead.
+      - name: Prefer system tar over Git tar (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "C:/Windows/System32" >> "$GITHUB_PATH"
+
       - uses: Swatinem/rust-cache@v2
 
       - name: Install dependencies
