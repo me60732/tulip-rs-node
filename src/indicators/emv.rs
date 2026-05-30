@@ -89,7 +89,7 @@ pub fn emv_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for EMV.
 #[napi]
 pub fn emv_info() -> InfoObject {
-    info_to_object(rust_emv::info())
+    info_to_object(rust_emv::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

@@ -88,7 +88,7 @@ pub fn max_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for MAX.
 #[napi]
 pub fn max_info() -> InfoObject {
-    info_to_object(rust_max::info())
+    info_to_object(rust_max::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

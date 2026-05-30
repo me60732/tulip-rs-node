@@ -89,7 +89,7 @@ pub fn typprice_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, op
 /// Static metadata for TypPrice.
 #[napi]
 pub fn typprice_info() -> InfoObject {
-    info_to_object(rust_typprice::info())
+    info_to_object(rust_typprice::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

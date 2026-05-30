@@ -89,7 +89,7 @@ pub fn vidya_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optio
 /// Static metadata for VIDYA.
 #[napi]
 pub fn vidya_info() -> InfoObject {
-    info_to_object(rust_vidya::info())
+    info_to_object(rust_vidya::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

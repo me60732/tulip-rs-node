@@ -89,7 +89,7 @@ pub fn wilders_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, opt
 /// Static metadata for Wilders Smoothing.
 #[napi]
 pub fn wilders_info() -> InfoObject {
-    info_to_object(rust_wilders::info())
+    info_to_object(rust_wilders::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

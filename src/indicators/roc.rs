@@ -88,7 +88,7 @@ pub fn roc_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for ROC.
 #[napi]
 pub fn roc_info() -> InfoObject {
-    info_to_object(rust_roc::info())
+    info_to_object(rust_roc::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

@@ -89,7 +89,7 @@ pub fn aroonosc_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, op
 /// Static metadata for AROONOSC.
 #[napi]
 pub fn aroonosc_info() -> InfoObject {
-    info_to_object(rust_aroonosc::info())
+    info_to_object(rust_aroonosc::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

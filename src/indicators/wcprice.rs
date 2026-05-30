@@ -89,7 +89,7 @@ pub fn wcprice_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, opt
 /// Static metadata for WCPrice.
 #[napi]
 pub fn wcprice_info() -> InfoObject {
-    info_to_object(rust_wcprice::info())
+    info_to_object(rust_wcprice::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

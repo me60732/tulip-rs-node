@@ -88,7 +88,7 @@ pub fn atr_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for ATR.
 #[napi]
 pub fn atr_info() -> InfoObject {
-    info_to_object(rust_atr::info())
+    info_to_object(rust_atr::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

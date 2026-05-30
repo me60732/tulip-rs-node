@@ -88,7 +88,7 @@ pub fn dm_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optional
 /// Static metadata for DM.
 #[napi]
 pub fn dm_info() -> InfoObject {
-    info_to_object(rust_dm::info())
+    info_to_object(rust_dm::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

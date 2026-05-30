@@ -89,7 +89,7 @@ pub fn macd_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, option
 /// Static metadata for MACD.
 #[napi]
 pub fn macd_info() -> InfoObject {
-    info_to_object(rust_macd::info())
+    info_to_object(rust_macd::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

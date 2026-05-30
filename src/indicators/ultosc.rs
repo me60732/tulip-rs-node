@@ -89,7 +89,7 @@ pub fn ultosc_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, opti
 /// Static metadata for UltOsc.
 #[napi]
 pub fn ultosc_info() -> InfoObject {
-    info_to_object(rust_ultosc::info())
+    info_to_object(rust_ultosc::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

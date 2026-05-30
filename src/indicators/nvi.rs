@@ -88,7 +88,7 @@ pub fn nvi_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for NVI.
 #[napi]
 pub fn nvi_info() -> InfoObject {
-    info_to_object(rust_nvi::info())
+    info_to_object(rust_nvi::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

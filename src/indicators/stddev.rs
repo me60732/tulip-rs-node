@@ -99,7 +99,7 @@ pub fn stddev_indicator(
 /// Static metadata for StdDev.
 #[napi]
 pub fn stddev_info() -> InfoObject {
-    info_to_object(rust_stddev::info())
+    info_to_object(rust_stddev::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

@@ -88,7 +88,7 @@ pub fn obv_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for OBV.
 #[napi]
 pub fn obv_info() -> InfoObject {
-    info_to_object(rust_obv::info())
+    info_to_object(rust_obv::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

@@ -88,7 +88,7 @@ pub fn tr_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optional
 /// Static metadata for TR.
 #[napi]
 pub fn tr_info() -> InfoObject {
-    info_to_object(rust_tr::info())
+    info_to_object(rust_tr::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

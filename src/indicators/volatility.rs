@@ -94,7 +94,7 @@ pub fn volatility_indicator(
 /// Static metadata for Volatility.
 #[napi]
 pub fn volatility_info() -> InfoObject {
-    info_to_object(rust_volatility::info())
+    info_to_object(rust_volatility::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

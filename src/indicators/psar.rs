@@ -89,7 +89,7 @@ pub fn psar_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, option
 /// Static metadata for PSAR.
 #[napi]
 pub fn psar_info() -> InfoObject {
-    info_to_object(rust_psar::info())
+    info_to_object(rust_psar::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

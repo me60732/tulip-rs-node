@@ -88,7 +88,7 @@ pub fn adx_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for ADX.
 #[napi]
 pub fn adx_info() -> InfoObject {
-    info_to_object(rust_adx::info())
+    info_to_object(rust_adx::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

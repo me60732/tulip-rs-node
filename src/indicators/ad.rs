@@ -88,7 +88,7 @@ pub fn ad_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optional
 /// Static metadata for AD.
 #[napi]
 pub fn ad_info() -> InfoObject {
-    info_to_object(rust_ad::info())
+    info_to_object(rust_ad::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

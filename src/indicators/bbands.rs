@@ -89,7 +89,7 @@ pub fn bbands_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, opti
 /// Static metadata for BBANDS.
 #[napi]
 pub fn bbands_info() -> InfoObject {
-    info_to_object(rust_bbands::info())
+    info_to_object(rust_bbands::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

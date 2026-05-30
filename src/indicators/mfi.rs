@@ -88,7 +88,7 @@ pub fn mfi_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for MFI.
 #[napi]
 pub fn mfi_info() -> InfoObject {
-    info_to_object(rust_mfi::info())
+    info_to_object(rust_mfi::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

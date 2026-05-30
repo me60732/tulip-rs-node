@@ -89,7 +89,7 @@ pub fn zlema_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optio
 /// Static metadata for ZLEMA.
 #[napi]
 pub fn zlema_info() -> InfoObject {
-    info_to_object(rust_zlema::info())
+    info_to_object(rust_zlema::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

@@ -88,7 +88,7 @@ pub fn dx_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optional
 /// Static metadata for DX.
 #[napi]
 pub fn dx_info() -> InfoObject {
-    info_to_object(rust_dx::info())
+    info_to_object(rust_dx::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

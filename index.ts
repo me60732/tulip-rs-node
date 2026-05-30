@@ -19,7 +19,7 @@
 import { Indicator } from "./src-ts/indicator.js";
 
 export { Indicator };
-export type { IndicatorInfo } from "./src-ts/indicator.js";
+export type { IndicatorInfo, DisplayGroup } from "./src-ts/indicator.js";
 
 // ── Indicators ──────────────────────────────────────────────────────────────
 export const ad = new Indicator("ad");

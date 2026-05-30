@@ -89,7 +89,7 @@ pub fn avgprice_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, op
 /// Static metadata for AVGPRICE.
 #[napi]
 pub fn avgprice_info() -> InfoObject {
-    info_to_object(rust_avgprice::info())
+    info_to_object(rust_avgprice::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

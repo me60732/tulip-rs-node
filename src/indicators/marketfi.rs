@@ -89,7 +89,7 @@ pub fn marketfi_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, op
 /// Static metadata for MARKETFI.
 #[napi]
 pub fn marketfi_info() -> InfoObject {
-    info_to_object(rust_marketfi::info())
+    info_to_object(rust_marketfi::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

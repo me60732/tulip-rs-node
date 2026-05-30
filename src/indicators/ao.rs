@@ -88,7 +88,7 @@ pub fn ao_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optional
 /// Static metadata for AO.
 #[napi]
 pub fn ao_info() -> InfoObject {
-    info_to_object(rust_ao::info())
+    info_to_object(rust_ao::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

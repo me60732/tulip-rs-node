@@ -88,7 +88,7 @@ pub fn di_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optional
 /// Static metadata for DI.
 #[napi]
 pub fn di_info() -> InfoObject {
-    info_to_object(rust_di::info())
+    info_to_object(rust_di::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

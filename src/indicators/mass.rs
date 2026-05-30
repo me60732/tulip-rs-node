@@ -89,7 +89,7 @@ pub fn mass_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, option
 /// Static metadata for MASS.
 #[napi]
 pub fn mass_info() -> InfoObject {
-    info_to_object(rust_mass::info())
+    info_to_object(rust_mass::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

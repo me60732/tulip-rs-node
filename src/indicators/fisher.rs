@@ -89,7 +89,7 @@ pub fn fisher_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, opti
 /// Static metadata for Fisher.
 #[napi]
 pub fn fisher_info() -> InfoObject {
-    info_to_object(rust_fisher::info())
+    info_to_object(rust_fisher::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

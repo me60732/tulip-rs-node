@@ -88,7 +88,7 @@ pub fn kvo_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for KVO.
 #[napi]
 pub fn kvo_info() -> InfoObject {
-    info_to_object(rust_kvo::info())
+    info_to_object(rust_kvo::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

@@ -88,7 +88,7 @@ pub fn mom_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for MOM.
 #[napi]
 pub fn mom_info() -> InfoObject {
-    info_to_object(rust_mom::info())
+    info_to_object(rust_mom::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

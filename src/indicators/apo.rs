@@ -88,7 +88,7 @@ pub fn apo_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for APO.
 #[napi]
 pub fn apo_info() -> InfoObject {
-    info_to_object(rust_apo::info())
+    info_to_object(rust_apo::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

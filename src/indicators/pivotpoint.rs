@@ -94,7 +94,7 @@ pub fn pivotpoint_indicator(
 /// Static metadata for PivotPoint.
 #[napi]
 pub fn pivotpoint_info() -> InfoObject {
-    info_to_object(rust_pivotpoint::info())
+    info_to_object(rust_pivotpoint::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

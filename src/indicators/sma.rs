@@ -88,7 +88,7 @@ pub fn sma_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for SMA.
 #[napi]
 pub fn sma_info() -> InfoObject {
-    info_to_object(rust_sma::info())
+    info_to_object(rust_sma::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

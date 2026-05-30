@@ -88,7 +88,7 @@ pub fn wma_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for WMA.
 #[napi]
 pub fn wma_info() -> InfoObject {
-    info_to_object(rust_wma::info())
+    info_to_object(rust_wma::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

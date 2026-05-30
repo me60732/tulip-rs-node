@@ -88,7 +88,7 @@ pub fn hma_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for HMA.
 #[napi]
 pub fn hma_info() -> InfoObject {
-    info_to_object(rust_hma::info())
+    info_to_object(rust_hma::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

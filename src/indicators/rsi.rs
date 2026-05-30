@@ -88,7 +88,7 @@ pub fn rsi_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for RSI.
 #[napi]
 pub fn rsi_info() -> InfoObject {
-    info_to_object(rust_rsi::info())
+    info_to_object(rust_rsi::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

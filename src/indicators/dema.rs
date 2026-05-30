@@ -89,7 +89,7 @@ pub fn dema_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, option
 /// Static metadata for DEMA.
 #[napi]
 pub fn dema_info() -> InfoObject {
-    info_to_object(rust_dema::info())
+    info_to_object(rust_dema::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

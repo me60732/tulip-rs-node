@@ -89,7 +89,7 @@ pub fn trix_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, option
 /// Static metadata for TRIX.
 #[napi]
 pub fn trix_info() -> InfoObject {
-    info_to_object(rust_trix::info())
+    info_to_object(rust_trix::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

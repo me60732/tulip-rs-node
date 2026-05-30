@@ -89,7 +89,7 @@ pub fn adosc_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optio
 /// Static metadata for ADOSC.
 #[napi]
 pub fn adosc_info() -> InfoObject {
-    info_to_object(rust_adosc::info())
+    info_to_object(rust_adosc::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

@@ -88,7 +88,7 @@ pub fn tsf_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optiona
 /// Static metadata for TSF.
 #[napi]
 pub fn tsf_info() -> InfoObject {
-    info_to_object(rust_tsf::info())
+    info_to_object(rust_tsf::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.

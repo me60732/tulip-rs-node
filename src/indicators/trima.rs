@@ -89,7 +89,7 @@ pub fn trima_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optio
 /// Static metadata for TRIMA.
 #[napi]
 pub fn trima_info() -> InfoObject {
-    info_to_object(rust_trima::info())
+    info_to_object(rust_trima::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.
