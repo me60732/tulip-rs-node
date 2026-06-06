@@ -46,6 +46,7 @@ export const donchianchannel = new Indicator("donchianchannel");
 export const dpo = new Indicator("dpo");
 export const dx = new Indicator("dx");
 export const ef = new Indicator("ef");
+export const elderray = new Indicator("elderray");
 export const ema = new Indicator("ema");
 export const emv = new Indicator("emv");
 export const fisher = new Indicator("fisher");

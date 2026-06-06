@@ -22,9 +22,9 @@ dependencies = [
 
 [[package]]
 name = "bitflags"
-version = "2.11.1"
+version = "2.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c4512299f36f043ab09a583e57bceb5a5aab7a73db1805848e8fef3c9e8c78b3"
+checksum = "b4388bee8683e3d04af747c73422af53102d2bd24d9eadb6cbc100baef4b43f8"
 
 [[package]]
 name = "cfg-if"
@@ -69,9 +69,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.8.0"
+version = "2.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
+checksum = "6b947ae49db0d222b1dbc6b113ce7248a3fc3a6ca21b696717bfc000ba4484d8"
 
 [[package]]
 name = "napi"
@@ -246,7 +246,7 @@ dependencies = [
 [[package]]
 name = "tulip_rs"
 version = "0.1.11"
-source = "git+https://github.com/me60732/tulip_rs.git#343c38f8a7df1e39d9ba628bc4d0762670aaf831"
+source = "git+https://github.com/me60732/tulip_rs.git#cba6d060b4a7d10a3f126823984821886b3eff24"
 dependencies = [
  "serde",
  "serde_json",
@@ -257,7 +257,7 @@ dependencies = [
 [[package]]
 name = "tulip_rs_macros"
 version = "0.1.0"
-source = "git+https://github.com/me60732/tulip_rs.git#343c38f8a7df1e39d9ba628bc4d0762670aaf831"
+source = "git+https://github.com/me60732/tulip_rs.git#cba6d060b4a7d10a3f126823984821886b3eff24"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -281,7 +281,7 @@ dependencies = [
 [[package]]
 name = "tulip_rs_shared"
 version = "0.1.0"
-source = "git+https://github.com/me60732/tulip_rs.git#343c38f8a7df1e39d9ba628bc4d0762670aaf831"
+source = "git+https://github.com/me60732/tulip_rs.git#cba6d060b4a7d10a3f126823984821886b3eff24"
 
 [[package]]
 name = "unicode-ident"
@@ -291,9 +291,9 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
 name = "unicode-segmentation"
-version = "1.13.2"
+version = "1.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9629274872b2bfaf8d66f5f15725007f635594914870f65218920345aa11aa8c"
+checksum = "c6f5d3c3b1bf09027a88a6bc961fc00497d651009560b5463668dc81b0fa87a8"
 
 [[package]]
 name = "windows-link"
