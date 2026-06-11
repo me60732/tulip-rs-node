@@ -1,7 +1,8 @@
-import * as ti from 'tulip-rs-node';
-import { WEMA } from 'technicalindicators';
+import * as ti from "tulip-rs-node";
+import { WEMA } from "technicalindicators";
+import { rma } from "indicatorts";
 
-export const name = 'wilders';
+export const name = "wilders";
 export const optionsList = [[14], [20], [50], [100]];
 
 export function tulipFn(data, options) {
@@ -10,4 +11,8 @@ export function tulipFn(data, options) {
 
 export function refFn(data, options) {
   return WEMA.calculate({ period: options[0], values: data.close });
+}
+
+export function ref2Fn(data, options) {
+  return rma(data.close, { period: options[0] });
 }

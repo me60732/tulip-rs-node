@@ -1,7 +1,8 @@
-import * as ti from 'tulip-rs-node';
-import { AwesomeOscillator } from 'technicalindicators';
+import * as ti from "tulip-rs-node";
+import { AwesomeOscillator } from "technicalindicators";
+import { ao } from "indicatorts";
 
-export const name = 'ao';
+export const name = "ao";
 export const optionsList = [[]];
 
 export function tulipFn(data, _options) {
@@ -9,5 +10,14 @@ export function tulipFn(data, _options) {
 }
 
 export function refFn(data, _options) {
-  return AwesomeOscillator.calculate({ fastPeriod: 5, slowPeriod: 34, high: data.high, low: data.low });
+  return AwesomeOscillator.calculate({
+    fastPeriod: 5,
+    slowPeriod: 34,
+    high: data.high,
+    low: data.low,
+  });
+}
+
+export function ref2Fn(data, _options) {
+  return ao(data.high, data.low);
 }

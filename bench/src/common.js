@@ -247,7 +247,7 @@ async function runBenchmark(defn, stocks, logger) {
     // Pre-convert Float64Arrays → plain Arrays once per stock, outside the timed
     // region, so reference implementations receive the Array<number> they expect.
     const refData =
-      defn.refFn != null
+      defn.refFn != null || defn.ref2Fn != null
         ? {
             ...data,
             open: Array.from(data.open),
@@ -293,6 +293,26 @@ async function runBenchmark(defn, stocks, logger) {
             implType: "technicalindicators",
             options,
             timing: refTiming,
+            symbol: data.symbol,
+            inputSize: data.length,
+          });
+        }
+      }
+
+      // ── indicatorts reference ─────────────────────────────────────────
+      if (defn.ref2Fn != null) {
+        const ref2Timing = timeFn(() => defn.ref2Fn(refData, options));
+        const ratio =
+          tulipTiming.mean_ns > 0
+            ? ref2Timing.mean_ns / tulipTiming.mean_ns
+            : Infinity;
+        _printRow("indicatorts", data.symbol, options, ref2Timing, ratio);
+        if (logger) {
+          await logger.log({
+            indicatorName: defn.name,
+            implType: "indicatorts",
+            options,
+            timing: ref2Timing,
             symbol: data.symbol,
             inputSize: data.length,
           });

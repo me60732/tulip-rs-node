@@ -1,5 +1,6 @@
 import * as ti from "tulip-rs-node";
 import { PSAR } from "technicalindicators";
+import { psar } from "indicatorts";
 
 export const name = "psar";
 export const optionsList = [
@@ -19,5 +20,12 @@ export function refFn(data, options) {
     max: options[1],
     high: data.high,
     low: data.low,
+  });
+}
+
+export function ref2Fn(data, options) {
+  return psar(data.high, data.low, data.close, {
+    step: options[0],
+    max: options[1],
   });
 }

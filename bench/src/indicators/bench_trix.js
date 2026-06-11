@@ -1,7 +1,8 @@
-import * as ti from 'tulip-rs-node';
-import { TRIX } from 'technicalindicators';
+import * as ti from "tulip-rs-node";
+import { TRIX } from "technicalindicators";
+import { trix } from "indicatorts";
 
-export const name = 'trix';
+export const name = "trix";
 export const optionsList = [[14], [18], [20], [30]];
 
 export function tulipFn(data, options) {
@@ -10,4 +11,8 @@ export function tulipFn(data, options) {
 
 export function refFn(data, options) {
   return TRIX.calculate({ period: options[0], values: data.close });
+}
+
+export function ref2Fn(data, options) {
+  return trix(data.close, { period: options[0] });
 }

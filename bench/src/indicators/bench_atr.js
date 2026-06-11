@@ -1,7 +1,8 @@
-import * as ti from 'tulip-rs-node';
-import { ATR } from 'technicalindicators';
+import * as ti from "tulip-rs-node";
+import { ATR } from "technicalindicators";
+import { atr } from "indicatorts";
 
-export const name = 'atr';
+export const name = "atr";
 export const optionsList = [[5], [14], [24], [30]];
 
 export function tulipFn(data, options) {
@@ -9,5 +10,14 @@ export function tulipFn(data, options) {
 }
 
 export function refFn(data, options) {
-  return ATR.calculate({ period: options[0], high: data.high, low: data.low, close: data.close });
+  return ATR.calculate({
+    period: options[0],
+    high: data.high,
+    low: data.low,
+    close: data.close,
+  });
+}
+
+export function ref2Fn(data, options) {
+  return atr(data.high, data.low, data.close, { period: options[0] });
 }
