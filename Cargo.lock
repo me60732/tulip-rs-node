@@ -267,7 +267,7 @@ dependencies = [
 
 [[package]]
 name = "tulip_rs_node"
-version = "0.1.13"
+version = "0.1.14"
 dependencies = [
  "bincode",
  "napi",
