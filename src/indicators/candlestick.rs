@@ -5,7 +5,7 @@ use tulip_rs::candle_indicators::candle_patterns::CandlePattern;
 use tulip_rs::candle_indicators::types::ForecastType as RustForecastType;
 use tulip_rs::indicators::candlestick as rust_cdl;
 
-use crate::utils::{info_to_object, js_pair, map_error, InfoObject};
+use crate::utils::{info_to_object, inputs_to_array, js_pair, map_error, InfoObject};
 
 const IW: usize = rust_cdl::INPUTS_WIDTH;
 const OW: usize = rust_cdl::OPTIONS_WIDTH;
@@ -83,15 +83,10 @@ impl CandlestickState {
     #[napi]
     pub fn batch_indicator(
         &mut self,
-        inputs: Vec<Vec<f64>>,
+        inputs: Vec<Float64Array>,
         forecast_type: Option<ForecastType>,
     ) -> Result<Vec<Option<Vec<CandlePatternObject>>>> {
-        let input_arr: [&[f64]; IW] = inputs
-            .iter()
-            .map(|v| v.as_slice())
-            .collect::<Vec<_>>()
-            .try_into()
-            .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
+        let input_arr = inputs_to_array::<IW>(&inputs)?;
         let raw = self
             .inner
             .batch_indicator(&input_arr, forecast_type.map(to_rust_forecast))
@@ -140,16 +135,11 @@ impl CandlestickState {
 #[napi]
 pub fn candlestick_indicator(
     env: Env,
-    inputs: Vec<Vec<f64>>,
+    inputs: Vec<Float64Array>,
     options: Vec<f64>,
     forecast_type: Option<ForecastType>,
 ) -> Result<JsObject> {
-    let input_arr: [&[f64]; IW] = inputs
-        .iter()
-        .map(|v| v.as_slice())
-        .collect::<Vec<_>>()
-        .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
+    let input_arr = inputs_to_array::<IW>(&inputs)?;
 
     let option_arr: [f64; OW] = options
         .try_into()

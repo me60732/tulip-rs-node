@@ -1,0 +1,19 @@
+{
+  "name": "tulip-rs-node-bench",
+  "version": "0.1.0",
+  "description": "Node.js benchmark suite — tulip-rs-node vs technicalindicators",
+  "type": "module",
+  "scripts": {
+    "bench": "node src/run_all.js",
+    "bench:db": "cross-env BENCHMARK_LOG_TO_DB=1 node src/run_all.js"
+  },
+  "dependencies": {
+    "tulip-rs-node": "file:../",
+    "technicalindicators": "^3.1.0",
+    "pg": "^8.11.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}

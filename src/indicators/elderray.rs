@@ -4,7 +4,7 @@ use napi_derive::napi;
 use tulip_rs::indicator_types::TIndicatorState as _;
 use tulip_rs::indicators::elderray as rust_elderray;
 
-use crate::utils::{info_to_object, js_pair, map_error, InfoObject};
+use crate::utils::{info_to_object, js_pair, map_error, inputs_to_array, vecs_to_float64arrays, InfoObject};
 
 const IW: usize = rust_elderray::INPUTS_WIDTH;
 const OW: usize = rust_elderray::OPTIONS_WIDTH;
@@ -22,18 +22,15 @@ impl ElderRayState {
     #[napi]
     pub fn batch_indicator(
         &mut self,
-        inputs: Vec<Vec<f64>>,
+        inputs: Vec<Float64Array>,
         optional_outputs: Option<Vec<bool>>,
-    ) -> Result<Vec<Vec<f64>>> {
-        let input_arr: [&[f64]; IW] = inputs
-            .iter()
-            .map(|v| v.as_slice())
-            .collect::<Vec<_>>()
-            .try_into()
-            .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
-        self.inner
+    ) -> Result<Vec<Float64Array>> {
+        let input_arr = inputs_to_array::<IW>(&inputs)?;
+        let outputs = self
+            .inner
             .batch_indicator(&input_arr, optional_outputs.as_deref())
-            .map_err(map_error)
+            .map_err(map_error)?;
+        Ok(vecs_to_float64arrays(outputs))
     }
 
     /// Serialize state to a compact binary `Buffer` (bincode).
@@ -75,16 +72,11 @@ impl ElderRayState {
 #[napi]
 pub fn elderray_indicator(
     env: Env,
-    inputs: Vec<Vec<f64>>,
+    inputs: Vec<Float64Array>,
     options: Vec<f64>,
     optional_outputs: Option<Vec<bool>>,
 ) -> Result<JsObject> {
-    let input_arr: [&[f64]; IW] = inputs
-        .iter()
-        .map(|v| v.as_slice())
-        .collect::<Vec<_>>()
-        .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
+    let input_arr = inputs_to_array::<IW>(&inputs)?;
 
     let option_arr: [f64; OW] = options
         .try_into()
@@ -93,7 +85,11 @@ pub fn elderray_indicator(
     let (outputs, inner) =
         rust_elderray::indicator(&input_arr, &option_arr, optional_outputs.as_deref())
             .map_err(map_error)?;
-    js_pair(&env, outputs, ElderRayState { inner })
+    js_pair(
+        &env,
+        vecs_to_float64arrays(outputs),
+        ElderRayState { inner },
+    )
 }
 
 /// Static metadata for ElderRay.
@@ -122,7 +118,7 @@ pub fn elderray_min_data_accuracy(options: Vec<f64>, decimals: u32) -> u32 {
 #[napi]
 pub fn elderray_simd_by_assets(
     env: Env,
-    inputs: Vec<Vec<Vec<f64>>>,
+    inputs: Vec<Vec<Float64Array>>,
     options: Vec<f64>,
     optional_outputs: Option<Vec<bool>>,
 ) -> Result<JsObject> {
@@ -140,7 +136,7 @@ pub fn elderray_simd_by_assets(
 
     let asset_vecs: Vec<Vec<&[f64]>> = inputs
         .iter()
-        .map(|asset| asset.iter().map(|v| v.as_slice()).collect())
+        .map(|asset| asset.iter().map(|v| v.as_ref()).collect())
         .collect();
 
     let input_arrays: Vec<[&[f64]; IW]> = asset_vecs
@@ -189,7 +185,8 @@ pub fn elderray_simd_by_assets(
         .into_iter()
         .map(|inner| ElderRayState { inner })
         .collect();
-    js_pair(&env, outs, states)
+    let js_outs: Vec<Vec<Float64Array>> = outs.into_iter().map(vecs_to_float64arrays).collect();
+    js_pair(&env, js_outs, states)
 }
 
 // ── SIMD — by options ────────────────────────────────────────────────────────
@@ -200,7 +197,7 @@ pub fn elderray_simd_by_assets(
 #[napi]
 pub fn elderray_simd_by_options(
     env: Env,
-    inputs: Vec<Vec<f64>>,
+    inputs: Vec<Float64Array>,
     options_list: Vec<Vec<f64>>,
     optional_outputs: Option<Vec<bool>>,
 ) -> Result<JsObject> {
@@ -212,12 +209,7 @@ pub fn elderray_simd_by_options(
         ));
     }
 
-    let input_arr: [&[f64]; IW] = inputs
-        .iter()
-        .map(|v| v.as_slice())
-        .collect::<Vec<_>>()
-        .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
+    let input_arr = inputs_to_array::<IW>(&inputs)?;
 
     let option_arrs: Vec<[f64; OW]> = options_list
         .into_iter()
@@ -265,5 +257,6 @@ pub fn elderray_simd_by_options(
         .into_iter()
         .map(|inner| ElderRayState { inner })
         .collect();
-    js_pair(&env, outs, states)
+    let js_outs: Vec<Vec<Float64Array>> = outs.into_iter().map(vecs_to_float64arrays).collect();
+    js_pair(&env, js_outs, states)
 }

@@ -1,18 +1,18 @@
 import * as ti from "../index.js";
 
 function main() {
-  const close = [
+  const close = Float64Array.from([
     81.59, 81.06, 82.87, 83.0, 83.61, 83.15, 82.84, 83.99, 84.55, 84.36, 85.53,
     86.54, 86.89, 87.77, 87.29,
-  ];
-  const high = [
+  ]);
+  const high = Float64Array.from([
     82.15, 81.89, 83.03, 83.3, 83.85, 83.9, 83.33, 84.3, 84.84, 85.0, 85.9,
     86.58, 86.98, 88.0, 87.87,
-  ];
-  const low = [
+  ]);
+  const low = Float64Array.from([
     81.29, 80.64, 81.31, 82.65, 83.07, 83.11, 82.49, 82.3, 84.15, 84.11, 84.03,
     85.39, 85.76, 87.17, 87.01,
-  ];
+  ]);
   const options = [5.0];
 
   const info = ti.adxr.info;
@@ -61,7 +61,7 @@ function main() {
   console.log("SIMD BY ASSETS DEMONSTRATION");
   console.log("=".repeat(60));
   const simdInputs = [
-    [[...high], [...low], [...close]],
+    [high.slice(), low.slice(), close.slice()],
     [
       high.map((v) => v * 1.2),
       low.map((v) => v * 1.2),
@@ -102,9 +102,9 @@ function main() {
   console.log("\n" + "=".repeat(60));
   console.log("SIMD BY OPTIONS DEMONSTRATION");
   console.log("=".repeat(60));
-  const expandedHigh = Array(20).fill(high).flat();
-  const expandedLow = Array(20).fill(low).flat();
-  const expandedClose = Array(20).fill(close).flat();
+  const expandedHigh = new Float64Array(Array.from({length:20}).flatMap(()=>Array.from(high)));
+  const expandedLow = new Float64Array(Array.from({length:20}).flatMap(()=>Array.from(low)));
+  const expandedClose = new Float64Array(Array.from({length:20}).flatMap(()=>Array.from(close)));
   const simdOptions = [[2], [5.0], [8], [10.0]];
   simdOptions.forEach((opt, i) =>
     console.log(`Option set ${i + 1}: ${JSON.stringify(opt)}`),

@@ -5,7 +5,7 @@
 import * as ti from '../index.js';
 
 function main() {
-  const volume = [5653100, 6447400, 7690900, 3831400, 4455100, 3798000, 3936200, 4732000, 4841300, 3915300, 6830800, 6694100, 5293600, 7985800, 4807900];
+  const volume = Float64Array.from([5653100, 6447400, 7690900, 3831400, 4455100, 3798000, 3936200, 4732000, 4841300, 3915300, 6830800, 6694100, 5293600, 7985800, 4807900]);
   const options = [2.0, 5.0];
 
   const info = ti.vosc.info;
@@ -40,7 +40,7 @@ function main() {
   console.log('SIMD BY ASSETS DEMONSTRATION');
   console.log('='.repeat(60));
   const simdInputs = [
-    [[...volume]],
+    [volume.slice()],
     [volume.map(v => v * 1.2)],
     [volume.map((v, i) => 90 + i * 0.5 + v * 0.1)],
     [volume.map((v, i) => 100 - i * 0.3 + v * 0.05)],
@@ -61,7 +61,7 @@ function main() {
   console.log('\n' + '='.repeat(60));
   console.log('SIMD BY OPTIONS DEMONSTRATION');
   console.log('='.repeat(60));
-  const expandedVolume = Array(20).fill(volume).flat();
+  const expandedVolume = new Float64Array(Array.from({length:20}).flatMap(()=>Array.from(volume)));
   const simdOptions = [[1, 3], [2.0, 5.0], [3, 7], [4.0, 10.0]];
   console.log(`Processing ${simdOptions.length} option sets simultaneously using SIMD...`);
   simdOptions.forEach((opt, i) => console.log(`Option set ${i + 1}: ${JSON.stringify(opt)}`));

@@ -5,10 +5,10 @@
 import * as ti from "../index.js";
 
 function main() {
-  const close = [
+  const close = Float64Array.from([
     81.59, 81.06, 82.87, 83.0, 83.61, 83.15, 82.84, 83.99, 84.55, 84.36, 85.53,
     86.54, 86.89, 87.77, 87.29,
-  ];
+  ]);
   const options = [2.0, 5.0, 0.2];
 
   const info = ti.vidya.info;
@@ -53,7 +53,7 @@ function main() {
   console.log("SIMD BY ASSETS DEMONSTRATION");
   console.log("=".repeat(60));
   const simdInputs = [
-    [[...close]],
+    [close.slice()],
     [close.map((v) => v * 1.2)],
     [close.map((v, i) => 90 + i * 0.5 + v * 0.1)],
     [close.map((v, i) => 100 - i * 0.3 + v * 0.05)],
@@ -82,7 +82,7 @@ function main() {
   console.log("\n" + "=".repeat(60));
   console.log("SIMD BY OPTIONS DEMONSTRATION");
   console.log("=".repeat(60));
-  const expandedClose = Array(20).fill(close).flat();
+  const expandedClose = new Float64Array(Array.from({length:20}).flatMap(()=>Array.from(close)));
   const simdOptions = [
     [1, 3, 0.1],
     [2.0, 5.0, 0.2],

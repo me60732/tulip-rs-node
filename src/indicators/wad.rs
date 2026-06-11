@@ -4,7 +4,7 @@ use napi_derive::napi;
 use tulip_rs::indicator_types::TIndicatorState as _;
 use tulip_rs::indicators::wad as rust_wad;
 
-use crate::utils::{info_to_object, js_pair, map_error, InfoObject};
+use crate::utils::{info_to_object, js_pair, map_error, inputs_to_array, vecs_to_float64arrays, InfoObject};
 
 const IW: usize = rust_wad::INPUTS_WIDTH;
 const OW: usize = rust_wad::OPTIONS_WIDTH;
@@ -20,16 +20,17 @@ pub struct WadState {
 impl WadState {
     /// Continue streaming: feed new bars into an existing state.
     #[napi]
-    pub fn batch_indicator(&mut self, inputs: Vec<Vec<f64>>, optional_outputs: Option<Vec<bool>>) -> Result<Vec<Vec<f64>>> {
-        let input_arr: [&[f64]; IW] = inputs
-            .iter()
-            .map(|v| v.as_slice())
-            .collect::<Vec<_>>()
-            .try_into()
-            .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
-        self.inner
+    pub fn batch_indicator(
+        &mut self,
+        inputs: Vec<Float64Array>,
+        optional_outputs: Option<Vec<bool>>,
+    ) -> Result<Vec<Float64Array>> {
+        let input_arr = inputs_to_array::<IW>(&inputs)?;
+        let outputs = self
+            .inner
             .batch_indicator(&input_arr, optional_outputs.as_deref())
-            .map_err(map_error)
+            .map_err(map_error)?;
+        Ok(vecs_to_float64arrays(outputs))
     }
 
     /// Serialize state to a compact binary `Buffer` (bincode).
@@ -69,20 +70,22 @@ impl WadState {
 /// Run the WAD (Williams Accumulation/Distribution) indicator. Returns `[outputs, state]` as a JS array.
 /// `inputs`: `[[high, low, close]]`
 #[napi]
-pub fn wad_indicator(env: Env, inputs: Vec<Vec<f64>>, options: Vec<f64>, optional_outputs: Option<Vec<bool>>) -> Result<JsObject> {
-    let input_arr: [&[f64]; IW] = inputs
-        .iter()
-        .map(|v| v.as_slice())
-        .collect::<Vec<_>>()
-        .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {IW} input series")))?;
+pub fn wad_indicator(
+    env: Env,
+    inputs: Vec<Float64Array>,
+    options: Vec<f64>,
+    optional_outputs: Option<Vec<bool>>,
+) -> Result<JsObject> {
+    let input_arr = inputs_to_array::<IW>(&inputs)?;
 
     let option_arr: [f64; OW] = options
         .try_into()
         .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
 
-    let (outputs, inner) = rust_wad::indicator(&input_arr, &option_arr, optional_outputs.as_deref()).map_err(map_error)?;
-    js_pair(&env, outputs, WadState { inner })
+    let (outputs, inner) =
+        rust_wad::indicator(&input_arr, &option_arr, optional_outputs.as_deref())
+            .map_err(map_error)?;
+    js_pair(&env, vecs_to_float64arrays(outputs), WadState { inner })
 }
 
 /// Static metadata for WAD.
@@ -97,7 +100,6 @@ pub fn wad_min_data(options: Vec<f64>) -> u32 {
     rust_wad::min_data(&options) as u32
 }
 
-
 /// Minimum input bars needed to achieve a given decimal accuracy.
 #[napi]
 pub fn wad_min_data_accuracy(options: Vec<f64>, decimals: u32) -> u32 {
@@ -110,7 +112,12 @@ pub fn wad_min_data_accuracy(options: Vec<f64>, decimals: u32) -> u32 {
 /// Returns `[outputs, states]` — both JS arrays of length N.
 /// `inputs` shape: `[N][3][data_len]`
 #[napi]
-pub fn wad_simd_by_assets(env: Env, inputs: Vec<Vec<Vec<f64>>>, options: Vec<f64>, optional_outputs: Option<Vec<bool>>) -> Result<JsObject> {
+pub fn wad_simd_by_assets(
+    env: Env,
+    inputs: Vec<Vec<Float64Array>>,
+    options: Vec<f64>,
+    optional_outputs: Option<Vec<bool>>,
+) -> Result<JsObject> {
     let n = inputs.len();
     if !matches!(n, 2 | 4 | 8 | 16) {
         return Err(Error::new(
@@ -125,7 +132,7 @@ pub fn wad_simd_by_assets(env: Env, inputs: Vec<Vec<Vec<f64>>>, options: Vec<f64
 
     let asset_vecs: Vec<Vec<&[f64]>> = inputs
         .iter()
-        .map(|asset| asset.iter().map(|v| v.as_slice()).collect())
+        .map(|asset| asset.iter().map(|v| v.as_ref()).collect())
         .collect();
 
     let input_arrays: Vec<[&[f64]; IW]> = asset_vecs
@@ -174,5 +181,6 @@ pub fn wad_simd_by_assets(env: Env, inputs: Vec<Vec<Vec<f64>>>, options: Vec<f64
         .into_iter()
         .map(|inner| WadState { inner })
         .collect();
-    js_pair(&env, outs, states)
+    let js_outs: Vec<Vec<Float64Array>> = outs.into_iter().map(vecs_to_float64arrays).collect();
+    js_pair(&env, js_outs, states)
 }

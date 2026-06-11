@@ -5,18 +5,18 @@
 import * as ti from "../index.js";
 
 function main() {
-  const high = [
+  const high = Float64Array.from([
     82.15, 81.89, 83.03, 83.3, 83.85, 83.9, 83.33, 84.3, 84.84, 85.0, 85.9,
     86.58, 86.98, 88.0, 87.87,
-  ];
-  const low = [
+  ]);
+  const low = Float64Array.from([
     81.29, 80.64, 81.31, 82.65, 83.07, 83.11, 82.49, 82.3, 84.15, 84.11, 84.03,
     85.39, 85.76, 87.17, 87.01,
-  ];
-  const volume = [
+  ]);
+  const volume = Float64Array.from([
     5653100, 6447400, 7690900, 3831400, 4455100, 3798000, 3936200, 4732000,
     4841300, 3915300, 6830800, 6694100, 5293600, 7985800, 4807900,
-  ];
+  ]);
   const options = [];
 
   const info = ti.marketfi.info;
@@ -63,7 +63,7 @@ function main() {
   console.log("SIMD BY ASSETS DEMONSTRATION");
   console.log("=".repeat(60));
   const simdInputs = [
-    [[...high], [...low], [...volume]],
+    [high.slice(), low.slice(), volume.slice()],
     [
       high.map((v) => v * 1.2),
       low.map((v) => v * 1.2),

@@ -5,14 +5,14 @@
 import * as ti from "../index.js";
 
 function main() {
-  const high = [
+  const high = Float64Array.from([
     82.15, 81.89, 83.03, 83.3, 83.85, 83.9, 83.33, 84.3, 84.84, 85.0, 85.9,
     86.58, 86.98, 88.0, 87.87,
-  ];
-  const low = [
+  ]);
+  const low = Float64Array.from([
     81.29, 80.64, 81.31, 82.65, 83.07, 83.11, 82.49, 82.3, 84.15, 84.11, 84.03,
     85.39, 85.76, 87.17, 87.01,
-  ];
+  ]);
   const options = [5.0];
 
   const info = ti.mass.info;
@@ -99,8 +99,8 @@ function main() {
   console.log("\n" + "=".repeat(60));
   console.log("SIMD BY OPTIONS DEMONSTRATION");
   console.log("=".repeat(60));
-  const expandedHigh = Array(20).fill(high).flat();
-  const expandedLow = Array(20).fill(low).flat();
+  const expandedHigh = new Float64Array(Array.from({length:20}).flatMap(()=>Array.from(high)));
+  const expandedLow = new Float64Array(Array.from({length:20}).flatMap(()=>Array.from(low)));
   const simdOptions = [[2], [5.0], [8], [10.0]];
   simdOptions.forEach((opt, i) =>
     console.log(`Option set ${i + 1}: ${JSON.stringify(opt)}`),

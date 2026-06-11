@@ -5,8 +5,8 @@
 import * as ti from '../index.js';
 
 function main() {
-  const high = [82.15, 81.89, 83.03, 83.30, 83.85, 83.90, 83.33, 84.30, 84.84, 85.00, 85.90, 86.58, 86.98, 88.00, 87.87];
-  const low  = [81.29, 80.64, 81.31, 82.65, 83.07, 83.11, 82.49, 82.30, 84.15, 84.11, 84.03, 85.39, 85.76, 87.17, 87.01];
+  const high = Float64Array.from([82.15, 81.89, 83.03, 83.30, 83.85, 83.90, 83.33, 84.30, 84.84, 85.00, 85.90, 86.58, 86.98, 88.00, 87.87]);
+  const low  = Float64Array.from([81.29, 80.64, 81.31, 82.65, 83.07, 83.11, 82.49, 82.30, 84.15, 84.11, 84.03, 85.39, 85.76, 87.17, 87.01]);
   const options = [5.0];
 
   const info = ti.aroon.info;
@@ -48,7 +48,7 @@ function main() {
   console.log('SIMD BY ASSETS DEMONSTRATION');
   console.log('='.repeat(60));
   const simdInputs = [
-    [[...high], [...low]],
+    [high.slice(), low.slice()],
     [high.map(v => v * 1.2), low.map(v => v * 1.2)],
     [high.map((v, i) => 90 + i * 0.5 + v * 0.1), low.map((v, i) => 90 + i * 0.5 + v * 0.1)],
     [high.map((v, i) => 100 - i * 0.3 + v * 0.05), low.map((v, i) => 100 - i * 0.3 + v * 0.05)],
@@ -69,8 +69,8 @@ function main() {
   console.log('\n' + '='.repeat(60));
   console.log('SIMD BY OPTIONS DEMONSTRATION');
   console.log('='.repeat(60));
-  const expandedHigh = Array(20).fill(high).flat();
-  const expandedLow  = Array(20).fill(low).flat();
+  const expandedHigh = new Float64Array(Array.from({length:20}).flatMap(()=>Array.from(high)));
+  const expandedLow  = new Float64Array(Array.from({length:20}).flatMap(()=>Array.from(low)));
   const simdOptions = [[2], [5.0], [8], [10.0]];
   simdOptions.forEach((opt, i) => console.log(`Option set ${i + 1}: ${JSON.stringify(opt)}`));
   console.log();

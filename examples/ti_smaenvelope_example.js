@@ -10,10 +10,10 @@
 import * as ti from "../index.js";
 
 function main() {
-  const close = [
+  const close = Float64Array.from([
     81.59, 81.06, 82.87, 83.0, 83.61, 83.15, 82.84, 83.99, 84.55, 84.36,
     85.53, 86.54, 86.89, 87.77, 87.29,
-  ];
+  ]);
   const options = [5.0, 2.0]; // period=5, percentage=2.0%
 
   const info = ti.smaenvelope.info;
@@ -59,7 +59,7 @@ function main() {
   console.log("SIMD BY ASSETS DEMONSTRATION");
   console.log("=".repeat(60));
   const simdInputs = [
-    [[...close]],                                          // Asset 1: original
+    [close.slice()],                                          // Asset 1: original
     [close.map((v) => v * 1.2)],                          // Asset 2: scaled up
     [close.map((v, i) => 90 + i * 0.5 + v * 0.1)],       // Asset 3: upward trend
     [close.map((v, i) => 100 - i * 0.3 + v * 0.05)],     // Asset 4: downward trend

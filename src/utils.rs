@@ -3,6 +3,25 @@ use napi::{Env, JsObject, JsUnknown, NapiValue};
 use napi_derive::napi;
 use tulip_rs::types::Info;
 
+// ── Typed-array output helpers ────────────────────────────────────────────────
+
+/// Convert a `Vec<f64>` into a `Float64Array`, transferring ownership of the
+/// allocation to V8.  Avoids the O(n) per-element boxing that occurs when
+/// returning `Vec<f64>` as a plain JS `Array<number>`.
+#[allow(dead_code)]
+pub fn vec_to_float64array(data: Vec<f64>) -> Float64Array {
+    Float64Array::new(data)
+}
+
+/// Convert `Vec<Vec<f64>>` into `Vec<Float64Array>` (`Array<Float64Array>` on
+/// the JS side).  Each inner Vec is transferred with a single pointer handoff;
+/// no per-element V8 API calls are made.
+pub fn vecs_to_float64arrays(vecs: Vec<Vec<f64>>) -> Vec<Float64Array> {
+    vecs.into_iter().map(Float64Array::new).collect()
+}
+
+// ── Info / metadata ───────────────────────────────────────────────────────────
+
 /// One entry in the `displayGroups` list of an [`InfoObject`].
 ///
 /// Each group describes a set of outputs that belong on the same rendering pane.
@@ -60,6 +79,24 @@ pub fn info_to_object(info: Info) -> InfoObject {
         display_groups,
     }
 }
+
+// ── Input-array conversion ───────────────────────────────────────────────────
+
+/// Convert a `&[Float64Array]` into `[&[f64]; N]`, validating that exactly
+/// `N` series were supplied.  Replaces the verbose
+/// `.iter().map().collect::<Vec<_>>().try_into().map_err(...)` chain that
+/// otherwise appears in every indicator binding function.
+pub fn inputs_to_array<const N: usize>(inputs: &[Float64Array]) -> Result<[&[f64]; N]> {
+    if inputs.len() != N {
+        return Err(Error::new(
+            Status::InvalidArg,
+            format!("Expected {N} input series"),
+        ));
+    }
+    Ok(std::array::from_fn(|i| inputs[i].as_ref()))
+}
+
+// ── Misc helpers ──────────────────────────────────────────────────────────────
 
 /// Convert any `Display` error into a napi `Error`.
 pub fn map_error<E: std::fmt::Display>(e: E) -> Error {
