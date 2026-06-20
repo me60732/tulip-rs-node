@@ -20,7 +20,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(', ')}`);
   }
   console.log(`Minimum data required: ${ti.medprice.minData([])}`);
-  console.log(`Minimum data for accuracy (6 decimals): ${ti.medprice.minDataAccuracy([], 6)}`);
   console.log();
 
   const [outputs] = ti.medprice.indicator([high, low], []);

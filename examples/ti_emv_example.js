@@ -32,7 +32,6 @@ function main() {
   }
   console.log(`Minimum data required: ${ti.emv.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.emv.minDataAccuracy(options, 6)}`,
   );
   console.log();
 

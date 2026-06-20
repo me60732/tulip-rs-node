@@ -27,7 +27,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(", ")}`);
   console.log(`Minimum data required: ${ti.stoch.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.stoch.minDataAccuracy(options, 6)}`,
   );
   console.log();
 

@@ -19,7 +19,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(', ')}`);
   }
   console.log(`Minimum data required: ${ti.dm.minData(options)}`);
-  console.log(`Minimum data for accuracy (6 decimals): ${ti.dm.minDataAccuracy(options, 6)}`);
   console.log();
 
   const [outputs] = ti.dm.indicator([high, low], options);

@@ -33,7 +33,6 @@ function main() {
   console.log(`Outputs: ${info.outputs.join(", ")}`);
   console.log(`Minimum data required: ${ti.avgprice.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.avgprice.minDataAccuracy([], 6)}`,
   );
   console.log();
 

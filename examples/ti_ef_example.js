@@ -23,7 +23,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(", ")}`);
   console.log(`Minimum data required: ${ti.ef.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.ef.minDataAccuracy(options, 6)}`,
   );
   console.log();
 

@@ -29,7 +29,6 @@ function main() {
   console.log(`Outputs: ${info.outputs.join(", ")}`);
   console.log(`Minimum data required: ${ti.wcprice.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.wcprice.minDataAccuracy([], 6)}`,
   );
   console.log();
 

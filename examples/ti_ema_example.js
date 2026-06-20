@@ -33,8 +33,6 @@ function main() {
   const minData = ti.ema.minData(options);
   console.log(`Minimum data required: ${minData}`);
 
-  const minDataAccuracy = ti.ema.minDataAccuracy(options, 6);
-  console.log(`Minimum data for accuracy (6 decimals): ${minDataAccuracy}`);
   console.log();
 
   /////////////////////////////////////////////////// Full Calculation

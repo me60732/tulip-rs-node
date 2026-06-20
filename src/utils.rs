@@ -35,6 +35,7 @@ pub struct DisplayGroupObject {
     pub display_type: String,
     /// Output names belonging to this group (may include optional outputs).
     pub outputs: Vec<String>,
+    pub offset: Option<String>,
 }
 
 /// Flat JS object returned by every `{name}Info()` function.
@@ -61,6 +62,7 @@ pub fn info_to_object(info: Info) -> InfoObject {
             label: g.label.to_string(),
             display_type: format!("{:?}", g.display_type),
             outputs: g.outputs.iter().map(|s| s.to_string()).collect(),
+            offset: g.offset.map(|s| s.to_string()),
         })
         .collect();
 

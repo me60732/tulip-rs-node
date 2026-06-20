@@ -19,7 +19,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(', ')}`);
   }
   console.log(`Minimum data required: ${ti.qstick.minData(options)}`);
-  console.log(`Minimum data for accuracy (6 decimals): ${ti.qstick.minDataAccuracy(options, 6)}`);
   console.log();
 
   const [outputs] = ti.qstick.indicator([open, close], options);

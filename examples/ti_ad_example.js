@@ -36,7 +36,6 @@ function main() {
   }
   console.log(`Minimum data required: ${ti.ad.minData([])}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.ad.minDataAccuracy([], 6)}`,
   );
   console.log();
 

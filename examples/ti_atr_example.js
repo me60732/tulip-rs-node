@@ -14,7 +14,6 @@ function main() {
   console.log(`Outputs: ${info.outputs.join(', ')}`);
   if (info.optionalOutputs && info.optionalOutputs.length > 0) console.log(`Optional Outputs: ${info.optionalOutputs.join(', ')}`);
   console.log(`Minimum data required: ${ti.atr.minData(options)}`);
-  console.log(`Minimum data for accuracy (6 decimals): ${ti.atr.minDataAccuracy(options, 6)}`);
   console.log();
 
   const [outputs] = ti.atr.indicator([high, low, close], options);

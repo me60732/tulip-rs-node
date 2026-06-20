@@ -19,7 +19,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(', ')}`);
   }
   console.log(`Minimum data required: ${ti.fisher.minData(options)}`);
-  console.log(`Minimum data for accuracy (6 decimals): ${ti.fisher.minDataAccuracy(options, 6)}`);
   console.log();
 
   const [outputs] = ti.fisher.indicator([high, low], options);

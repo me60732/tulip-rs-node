@@ -38,7 +38,6 @@ function main() {
   }
   console.log(`Minimum data required: ${ti.ao.minData([])}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.ao.minDataAccuracy([], 6)}`,
   );
   console.log(
     `Input length used: ${high.length} bars (standard 15-bar data × 3)`,

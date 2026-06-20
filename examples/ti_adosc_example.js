@@ -22,7 +22,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(', ')}`);
   }
   console.log(`Minimum data required: ${ti.adosc.minData(options)}`);
-  console.log(`Minimum data for accuracy (6 decimals): ${ti.adosc.minDataAccuracy(options, 6)}`);
   console.log();
 
   const [outputs] = ti.adosc.indicator([high, low, close, volume], options);

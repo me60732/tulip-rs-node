@@ -22,7 +22,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(', ')}`);
   }
   console.log(`Minimum data required: ${ti.macd.minData(options)}`);
-  console.log(`Minimum data for accuracy (6 decimals): ${ti.macd.minDataAccuracy(options, 6)}`);
   console.log();
 
   const [outputs] = ti.macd.indicator([close], options);

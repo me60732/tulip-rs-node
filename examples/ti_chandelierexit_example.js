@@ -32,7 +32,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(", ")}`);
   console.log(`Minimum data required: ${ti.chandelierexit.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.chandelierexit.minDataAccuracy(options, 6)}`,
   );
   console.log();
 

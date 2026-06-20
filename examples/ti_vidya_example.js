@@ -24,7 +24,6 @@ function main() {
   }
   console.log(`Minimum data required: ${ti.vidya.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.vidya.minDataAccuracy(options, 6)}`,
   );
   console.log();
 

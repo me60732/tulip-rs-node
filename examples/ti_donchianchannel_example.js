@@ -30,7 +30,6 @@ function main() {
   console.log(`Outputs: ${info.outputs.join(", ")}`);
   console.log(`Minimum data required: ${ti.donchianchannel.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.donchianchannel.minDataAccuracy(options, 6)}`,
   );
   console.log();
 

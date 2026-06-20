@@ -31,8 +31,6 @@ function main() {
 
   const minData = ti.mom.minData(options);
   console.log(`Minimum data required: ${minData}`);
-  const minDataAccuracy = ti.mom.minDataAccuracy(options, 6);
-  console.log(`Minimum data for accuracy (6 decimals): ${minDataAccuracy}`);
   console.log();
 
   /////////////////////////////////////////////////// Full Calculation

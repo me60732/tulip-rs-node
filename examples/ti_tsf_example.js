@@ -22,7 +22,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(', ')}`);
   }
   console.log(`Minimum data required: ${ti.tsf.minData(options)}`);
-  console.log(`Minimum data for accuracy (6 decimals): ${ti.tsf.minDataAccuracy(options, 6)}`);
   console.log();
 
   const [outputs] = ti.tsf.indicator([close], options);

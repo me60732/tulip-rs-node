@@ -27,14 +27,12 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(", ")}`);
   }
   console.log(`Minimum data required: ${ti.mass.minData(options)}`);
-  console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.mass.minDataAccuracy(options, 6)}`,
-  );
+  console.log();
   console.log();
 
   // Double the data so we exceed min_data (21 bars for period=5)
-  const fullHigh = [...high, ...high];
-  const fullLow = [...low, ...low];
+  const fullHigh = Float64Array.from([...high, ...high]);
+  const fullLow = Float64Array.from([...low, ...low]);
 
   const [outputs] = ti.mass.indicator([fullHigh, fullLow], options);
   console.log("Full dataset calculation:");
@@ -64,7 +62,7 @@ function main() {
   console.log("SIMD BY ASSETS DEMONSTRATION");
   console.log("=".repeat(60));
   const simdInputs = [
-    [[...fullHigh], [...fullLow]],
+    [fullHigh.slice(), fullLow.slice()],
     [fullHigh.map((v) => v * 1.2), fullLow.map((v) => v * 1.2)],
     [
       fullHigh.map((v, i) => 90 + i * 0.5 + v * 0.1),
@@ -99,8 +97,12 @@ function main() {
   console.log("\n" + "=".repeat(60));
   console.log("SIMD BY OPTIONS DEMONSTRATION");
   console.log("=".repeat(60));
-  const expandedHigh = new Float64Array(Array.from({length:20}).flatMap(()=>Array.from(high)));
-  const expandedLow = new Float64Array(Array.from({length:20}).flatMap(()=>Array.from(low)));
+  const expandedHigh = new Float64Array(
+    Array.from({ length: 20 }).flatMap(() => Array.from(high)),
+  );
+  const expandedLow = new Float64Array(
+    Array.from({ length: 20 }).flatMap(() => Array.from(low)),
+  );
   const simdOptions = [[2], [5.0], [8], [10.0]];
   simdOptions.forEach((opt, i) =>
     console.log(`Option set ${i + 1}: ${JSON.stringify(opt)}`),

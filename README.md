@@ -7,7 +7,7 @@
 **High-performance technical analysis for Node.js — powered by Rust.**
 
 Native Node.js bindings for [TulipRS](https://github.com/me60732/tulip_rs) via
-[napi-rs](https://napi.rs). Implements 70+ technical indicators and 60+
+[napi-rs](https://napi.rs). Implements 100+ technical indicators and 77+
 candlestick patterns with first-class SIMD acceleration. Process multiple assets
 or multiple parameter sets in a single CPU pass, stream live bars into stateful
 indicators without reprocessing history.
@@ -92,7 +92,6 @@ const info = ti.sma.info;
 // }
 
 ti.sma.minData([5]);            // minimum bars needed to produce output
-ti.sma.minDataAccuracy([5], 6); // bars needed for 6-decimal accuracy
 ```
 
 ### Running an indicator
@@ -226,14 +225,14 @@ Each pattern object has:
 
 | Category | Indicators |
 |---|---|
-| **Trend** | SMA, EMA, DEMA, TEMA, WMA, HMA, KAMA, TRIMA, ZLEMA, WILDERS, VIDYA, LINREG, TSF |
-| **Momentum** | RSI, CMO, MOM, ROC, ROCR, STOCH, STOCHRSI, DPO, FOSC, MACD, APO, PPO |
-| **Volatility** | ATR, NATR, VOLATILITY, BBANDS, STDDEV, MD |
-| **Volume** | OBV, AD, ADOSC, MFI, EMV, NVI, PVI, KVO, VWMA, VOSC |
-| **Directional** | ADX, ADXR, DI, DM, DX, AROON, AROONOSC, PSAR |
-| **Price** | AVGPRICE, MEDPRICE, TYPPRICE, WCPRICE |
-| **Other** | AO, BOP, CCI, CVI, FISHER, MASS, MARKETFI, MSW, QSTICK, TR, VHF, WAD, WILLR, PIVOTPOINT, ULTOSC |
-| **Candlestick** | 60+ patterns via `ti.candlestick` |
+| **Moving Averages** | SMA, EMA, WMA, DEMA, TEMA, TRIMA, HMA, ZLEMA, KAMA, VIDYA, VWMA, Wilders, SMA Envelope |
+| **Oscillators** | RSI, MACD, Stochastic, StochRSI, Williams %R, CCI, CMO, Ultimate Oscillator, AO, Fisher Transform, FOSC, MSW, TRIX |
+| **Trend** | ADX, ADXR, DI, DM, DX, Aroon, Aroon Osc, PSAR, PPO, APO, Vortex, Elder-Ray, Donchian Channel, Ichimoku, SuperTrend, Efficiency Ratio, MAMA |
+| **Volatility** | BBands, ATR, NATR, TR, StdDev, Volatility, VHF, CVI, Chandelier Exit, Keltner Channel, TRVI |
+| **Volume** | AD, ADOSC, OBV, MFI, NVI, PVI, VOSC, KVO, EMV, WAD, MarketFi, ChaikinMF, VWAP |
+| **Price & Statistical** | AvgPrice, MedPrice, TypPrice, WCPrice, Max, Min, MOM, ROC, ROCR, BOP, LinReg, TSF, DPO, Mass, MD, QStick, PivotPoint |
+| **Cycle & Ehlers** | CyberCycle, Adaptive MSW, Homodyne Discriminator, Instantaneous Trendline, TrendMode, High Pass Filter, Hilbert Transform, Roofing Filter, Super Smoother, CC Fisher |
+| **Candlestick** | 77+ patterns via `ti.candlestick` |
 
 ---
 

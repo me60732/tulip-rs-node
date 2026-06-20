@@ -47,7 +47,6 @@ export class Indicator<S = unknown> {
   readonly minData: (options: number[]) => number;
 
   /** Minimum input bars needed to achieve a given decimal accuracy. */
-  readonly minDataAccuracy: (options: number[], decimals: number) => number;
 
   /**
    * SIMD — run N assets through the indicator in a single pass.
@@ -87,9 +86,6 @@ export class Indicator<S = unknown> {
     this.info = (n[`${name}Info`] as () => IndicatorInfo)();
     this.indicator = n[`${name}Indicator`] as this["indicator"];
     this.minData = n[`${name}MinData`] as this["minData"];
-    this.minDataAccuracy = n[
-      `${name}MinDataAccuracy`
-    ] as this["minDataAccuracy"];
     this.simdByAssets = n[`${name}SimdByAssets`] as this["simdByAssets"];
     this.simdByOptions = n[`${name}SimdByOptions`] as
       | this["simdByOptions"]

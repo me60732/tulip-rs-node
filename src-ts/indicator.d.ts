@@ -34,7 +34,6 @@ export declare class Indicator<S = unknown> {
     /** Minimum number of input bars required to produce at least one output bar. */
     readonly minData: (options: number[]) => number;
     /** Minimum input bars needed to achieve a given decimal accuracy. */
-    readonly minDataAccuracy: (options: number[], decimals: number) => number;
     /**
      * SIMD — run N assets through the indicator in a single pass.
      * N must be 2, 4, 8, or 16.

@@ -28,7 +28,6 @@ function main() {
   }
   console.log(`Minimum data required: ${ti.pvi.minData([])}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.pvi.minDataAccuracy([], 6)}`,
   );
   console.log();
 

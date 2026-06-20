@@ -32,8 +32,6 @@ function main() {
 
   const minData = ti.trima.minData(options);
   console.log(`Minimum data required: ${minData}`);
-  const minDataAccuracy = ti.trima.minDataAccuracy(options, 6);
-  console.log(`Minimum data for accuracy (6 decimals): ${minDataAccuracy}`);
   console.log();
 
   /////////////////////////////////////////////////// Full Calculation

@@ -33,8 +33,6 @@ function main() {
   const minData = ti.linreg.minData(options);
   console.log(`Minimum data required: ${minData}`);
 
-  const minDataAccuracy = ti.linreg.minDataAccuracy(options, 6);
-  console.log(`Minimum data for accuracy (6 decimals): ${minDataAccuracy}`);
   console.log();
 
   /////////////////////////////////////////////////// Full Calculation

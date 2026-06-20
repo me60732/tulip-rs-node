@@ -31,8 +31,6 @@ function main() {
 
   const minData = ti.roc.minData(options);
   console.log(`Minimum data required: ${minData}`);
-  const minDataAccuracy = ti.roc.minDataAccuracy(options, 6);
-  console.log(`Minimum data for accuracy (6 decimals): ${minDataAccuracy}`);
   console.log();
 
   /////////////////////////////////////////////////// Full Calculation

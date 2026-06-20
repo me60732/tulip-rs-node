@@ -15,7 +15,6 @@ export class Indicator {
     /** Minimum number of input bars required to produce at least one output bar. */
     minData;
     /** Minimum input bars needed to achieve a given decimal accuracy. */
-    minDataAccuracy;
     /**
      * SIMD — run N assets through the indicator in a single pass.
      * N must be 2, 4, 8, or 16.
@@ -41,7 +40,6 @@ export class Indicator {
         this.info = n[`${name}Info`]();
         this.indicator = n[`${name}Indicator`];
         this.minData = n[`${name}MinData`];
-        this.minDataAccuracy = n[`${name}MinDataAccuracy`];
         this.simdByAssets = n[`${name}SimdByAssets`];
         this.simdByOptions = n[`${name}SimdByOptions`];
         this.State = n[`${cap}State`];

@@ -21,7 +21,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(', ')}`);
   }
   console.log(`Minimum data required: ${ti.mfi.minData(options)}`);
-  console.log(`Minimum data for accuracy (6 decimals): ${ti.mfi.minDataAccuracy(options, 6)}`);
   console.log();
 
   const [outputs] = ti.mfi.indicator([high, low, close, volume], options);

@@ -22,7 +22,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(', ')}`);
   }
   console.log(`Minimum data required: ${ti.kvo.minData(options)}`);
-  console.log(`Minimum data for accuracy (6 decimals): ${ti.kvo.minDataAccuracy(options, 6)}`);
   console.log();
 
   const [outputs] = ti.kvo.indicator([high, low, close, volume], options);

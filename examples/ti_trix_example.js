@@ -24,7 +24,6 @@ function main() {
   }
   console.log(`Minimum data required: ${ti.trix.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.trix.minDataAccuracy(options, 6)}`,
   );
   console.log();
 

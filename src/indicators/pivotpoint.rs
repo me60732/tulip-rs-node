@@ -104,10 +104,5 @@ pub fn pivotpoint_min_data(options: Vec<f64>) -> u32 {
     rust_pivotpoint::min_data(&options) as u32
 }
 
-/// Minimum input bars needed to achieve a given decimal accuracy.
-#[napi]
-pub fn pivotpoint_min_data_accuracy(options: Vec<f64>, decimals: u32) -> u32 {
-    rust_pivotpoint::min_data_accuracy(&options, decimals as usize) as u32
-}
 
 // pivotpoint does not expose simd_by_assets (not present in tulip_rs for this indicator)

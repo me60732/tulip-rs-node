@@ -28,7 +28,6 @@ function main() {
   }
   console.log(`Minimum data required: ${ti.nvi.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.nvi.minDataAccuracy(options, 6)}`,
   );
   console.log();
 

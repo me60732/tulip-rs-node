@@ -32,7 +32,6 @@ function main() {
     console.log(`Optional Outputs: ${info.optionalOutputs.join(", ")}`);
   console.log(`Minimum data required: ${ti.keltnerchannel.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.keltnerchannel.minDataAccuracy(options, 6)}`,
   );
   console.log();
 

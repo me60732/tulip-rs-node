@@ -37,7 +37,6 @@ function main() {
   console.log(`Outputs: ${info.outputs.join(", ")}`);
   console.log(`Minimum data required: ${ti.pivotpoint.minData(options)}`);
   console.log(
-    `Minimum data for accuracy (6 decimals): ${ti.pivotpoint.minDataAccuracy(options, 6)}`,
   );
   console.log();
 
