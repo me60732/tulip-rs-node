@@ -30,7 +30,8 @@ const BENCH_DB_URL =
 
 const LOG_TO_DB = process.env.BENCHMARK_LOG_TO_DB === "1";
 const BENCH_NUMBER = parseInt(process.env.BENCH_NUMBER ?? "10", 10);
-const BENCH_REPEAT = parseInt(process.env.BENCH_REPEAT ?? "30", 10);
+const BENCH_REPEAT = parseInt(process.env.BENCH_REPEAT ?? "500", 10);
+const BENCH_WARMUP = parseInt(process.env.BENCH_WARMUP ?? "50", 10);
 const DATA_LIMIT = 6705; // same row-count as Rust benchmarks
 const STOCKS = [
   ["BHP", "ASX"],
@@ -49,7 +50,16 @@ const STOCKS = [
  *
  * Returns { mean_ns, stddev_ns, min_ns, max_ns, sample_count }.
  */
-function timeFn(fn, number = BENCH_NUMBER, repeat = BENCH_REPEAT) {
+function timeFn(
+  fn,
+  number = BENCH_NUMBER,
+  repeat = BENCH_REPEAT,
+  warmup = BENCH_WARMUP,
+) {
+  // Un-timed warm-up — lets the JIT compile hot paths and CPU caches stabilise
+  // before any measurements are taken.  Defaults to BENCH_WARMUP (env var).
+  for (let w = 0; w < warmup; w++) fn();
+
   const samples = [];
   for (let r = 0; r < repeat; r++) {
     const start = process.hrtime.bigint();
@@ -332,4 +342,5 @@ export {
   LOG_TO_DB,
   BENCH_NUMBER,
   BENCH_REPEAT,
+  BENCH_WARMUP,
 };
