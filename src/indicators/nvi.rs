@@ -2,18 +2,17 @@ use napi::bindgen_prelude::*;
 use napi::{Env, JsObject};
 use napi_derive::napi;
 use tulip_rs::indicator_types::TIndicatorState as _;
-use tulip_rs::indicators::nvi as rust_nvi;
+use tulip_rs::indicators::nvi::{Indicator, IndicatorState, Nvi, INPUTS, OPTIONS};
 
-use crate::utils::{info_to_object, js_pair, map_error, inputs_to_array, vecs_to_float64arrays, InfoObject};
-
-const IW: usize = rust_nvi::INPUTS_WIDTH;
-const OW: usize = rust_nvi::OPTIONS_WIDTH;
+use crate::utils::{
+    info_to_object, inputs_to_array, js_pair, map_error, vecs_to_float64arrays, InfoObject,
+};
 
 // ── State class ──────────────────────────────────────────────────────────────
 
 #[napi]
 pub struct NviState {
-    pub(crate) inner: rust_nvi::IndicatorState,
+    pub(crate) inner: IndicatorState,
 }
 
 #[napi]
@@ -25,7 +24,7 @@ impl NviState {
         inputs: Vec<Float64Array>,
         optional_outputs: Option<Vec<bool>>,
     ) -> Result<Vec<Float64Array>> {
-        let input_arr = inputs_to_array::<IW>(&inputs)?;
+        let input_arr = inputs_to_array::<INPUTS>(&inputs)?;
         let outputs = self
             .inner
             .batch_indicator(&input_arr, optional_outputs.as_deref())
@@ -44,7 +43,7 @@ impl NviState {
     /// Restore state from a `Buffer` produced by `toBuffer()`.
     #[napi(factory)]
     pub fn from_buffer(buf: Buffer) -> Result<Self> {
-        bincode::deserialize::<rust_nvi::IndicatorState>(buf.as_ref())
+        bincode::deserialize::<IndicatorState>(buf.as_ref())
             .map(|inner| Self { inner })
             .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
     }
@@ -59,7 +58,7 @@ impl NviState {
     /// Restore state from a JSON string produced by `toJson()`.
     #[napi(factory)]
     pub fn from_json(json: String) -> Result<Self> {
-        serde_json::from_str::<rust_nvi::IndicatorState>(&json)
+        serde_json::from_str::<IndicatorState>(&json)
             .map(|inner| Self { inner })
             .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
     }
@@ -76,30 +75,28 @@ pub fn nvi_indicator(
     options: Vec<f64>,
     optional_outputs: Option<Vec<bool>>,
 ) -> Result<JsObject> {
-    let input_arr = inputs_to_array::<IW>(&inputs)?;
+    let input_arr = inputs_to_array::<INPUTS>(&inputs)?;
 
-    let option_arr: [f64; OW] = options
+    let option_arr: [f64; OPTIONS] = options
         .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OPTIONS} options")))?;
 
     let (outputs, inner) =
-        rust_nvi::indicator(&input_arr, &option_arr, optional_outputs.as_deref())
-            .map_err(map_error)?;
+        Nvi::indicator(&input_arr, &option_arr, optional_outputs.as_deref()).map_err(map_error)?;
     js_pair(&env, vecs_to_float64arrays(outputs), NviState { inner })
 }
 
 /// Static metadata for NVI.
 #[napi]
 pub fn nvi_info() -> InfoObject {
-    info_to_object(rust_nvi::INFO)
+    info_to_object(Nvi::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.
 #[napi]
-pub fn nvi_min_data(options: Vec<f64>) -> u32 {
-    rust_nvi::min_data(&options) as u32
+pub fn nvi_min_data(_options: Vec<f64>) -> u32 {
+    Nvi::min_data(&[]) as u32
 }
-
 
 // ── SIMD — by assets ─────────────────────────────────────────────────────────
 
@@ -121,49 +118,49 @@ pub fn nvi_simd_by_assets(
         ));
     }
 
-    let option_arr: [f64; OW] = options
+    let option_arr: [f64; OPTIONS] = options
         .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OPTIONS} options")))?;
 
     let asset_vecs: Vec<Vec<&[f64]>> = inputs
         .iter()
         .map(|asset| asset.iter().map(|v| v.as_ref()).collect())
         .collect();
 
-    let input_arrays: Vec<[&[f64]; IW]> = asset_vecs
+    let input_arrays: Vec<[&[f64]; INPUTS]> = asset_vecs
         .iter()
         .map(|a| {
             a.as_slice().try_into().map_err(|_| {
                 Error::new(
                     Status::InvalidArg,
-                    format!("Each asset must have {IW} input series"),
+                    format!("Each asset must have {INPUTS} input series"),
                 )
             })
         })
         .collect::<Result<_>>()?;
 
-    let input_refs: Vec<&[&[f64]; IW]> = input_arrays.iter().collect();
+    let input_refs: Vec<&[&[f64]; INPUTS]> = input_arrays.iter().collect();
 
     let (outs, states_inner) = match n {
-        2 => rust_nvi::by_assets::indicator::<2>(
+        2 => Nvi::indicator_by_assets::<2>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
             optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
-        4 => rust_nvi::by_assets::indicator::<4>(
+        4 => Nvi::indicator_by_assets::<4>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
             optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
-        8 => rust_nvi::by_assets::indicator::<8>(
+        8 => Nvi::indicator_by_assets::<8>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
             optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
-        16 => rust_nvi::by_assets::indicator::<16>(
+        16 => Nvi::indicator_by_assets::<16>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
             optional_outputs.as_deref(),

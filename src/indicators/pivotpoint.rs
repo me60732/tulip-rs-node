@@ -2,18 +2,17 @@ use napi::bindgen_prelude::*;
 use napi::{Env, JsObject};
 use napi_derive::napi;
 use tulip_rs::indicator_types::TIndicatorState as _;
-use tulip_rs::indicators::pivotpoint as rust_pivotpoint;
+use tulip_rs::indicators::pivotpoint::{indicator, min_data, IndicatorState, INFO};
 
-use crate::utils::{info_to_object, js_pair, map_error, inputs_to_array, vecs_to_float64arrays, InfoObject};
-
-const IW: usize = rust_pivotpoint::INPUTS_WIDTH;
-const OW: usize = rust_pivotpoint::OPTIONS_WIDTH;
+use crate::utils::{
+    info_to_object, inputs_to_array, js_pair, map_error, vecs_to_float64arrays, InfoObject,
+};
 
 // ── State class ──────────────────────────────────────────────────────────────
 
 #[napi]
 pub struct PivotpointState {
-    pub(crate) inner: rust_pivotpoint::IndicatorState,
+    pub(crate) inner: IndicatorState,
 }
 
 #[napi]
@@ -25,7 +24,7 @@ impl PivotpointState {
         inputs: Vec<Float64Array>,
         optional_outputs: Option<Vec<bool>>,
     ) -> Result<Vec<Float64Array>> {
-        let input_arr = inputs_to_array::<IW>(&inputs)?;
+        let input_arr = inputs_to_array::<3>(&inputs)?;
         let outputs = self
             .inner
             .batch_indicator(&input_arr, optional_outputs.as_deref())
@@ -44,7 +43,7 @@ impl PivotpointState {
     /// Restore state from a `Buffer` produced by `toBuffer()`.
     #[napi(factory)]
     pub fn from_buffer(buf: Buffer) -> Result<Self> {
-        bincode::deserialize::<rust_pivotpoint::IndicatorState>(buf.as_ref())
+        bincode::deserialize::<IndicatorState>(buf.as_ref())
             .map(|inner| Self { inner })
             .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
     }
@@ -59,7 +58,7 @@ impl PivotpointState {
     /// Restore state from a JSON string produced by `toJson()`.
     #[napi(factory)]
     pub fn from_json(json: String) -> Result<Self> {
-        serde_json::from_str::<rust_pivotpoint::IndicatorState>(&json)
+        serde_json::from_str::<IndicatorState>(&json)
             .map(|inner| Self { inner })
             .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
     }
@@ -68,7 +67,7 @@ impl PivotpointState {
 // ── Top-level functions ───────────────────────────────────────────────────────
 
 /// Run the PivotPoint indicator. Returns `[outputs, state]` as a JS array.
-/// `inputs`: `[[high, low, close]]`   `options`: indicator-specific options
+/// `inputs`: `[[high, low, close]]`   `options`: `[period]`
 #[napi]
 pub fn pivotpoint_indicator(
     env: Env,
@@ -76,15 +75,14 @@ pub fn pivotpoint_indicator(
     options: Vec<f64>,
     optional_outputs: Option<Vec<bool>>,
 ) -> Result<JsObject> {
-    let input_arr = inputs_to_array::<IW>(&inputs)?;
+    let input_arr = inputs_to_array::<3>(&inputs)?;
 
-    let option_arr: [f64; OW] = options
+    let option_arr: [f64; 1] = options
         .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected 1 options")))?;
 
     let (outputs, inner) =
-        rust_pivotpoint::indicator(&input_arr, &option_arr, optional_outputs.as_deref())
-            .map_err(map_error)?;
+        indicator(&input_arr, &option_arr, optional_outputs.as_deref()).map_err(map_error)?;
     js_pair(
         &env,
         vecs_to_float64arrays(outputs),
@@ -95,14 +93,15 @@ pub fn pivotpoint_indicator(
 /// Static metadata for PivotPoint.
 #[napi]
 pub fn pivotpoint_info() -> InfoObject {
-    info_to_object(rust_pivotpoint::INFO)
+    info_to_object(INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.
 #[napi]
 pub fn pivotpoint_min_data(options: Vec<f64>) -> u32 {
-    rust_pivotpoint::min_data(&options) as u32
+    let option_arr: [f64; 1] = options
+        .try_into()
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected 1 options")))
+        .unwrap();
+    min_data(&option_arr) as u32
 }
-
-
-// pivotpoint does not expose simd_by_assets (not present in tulip_rs for this indicator)

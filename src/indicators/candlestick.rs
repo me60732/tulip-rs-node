@@ -1,14 +1,12 @@
 use napi::bindgen_prelude::*;
 use napi::{Env, JsObject};
 use napi_derive::napi;
+
 use tulip_rs::candle_indicators::candle_patterns::CandlePattern;
 use tulip_rs::candle_indicators::types::ForecastType as RustForecastType;
-use tulip_rs::indicators::candlestick as rust_cdl;
+use tulip_rs::indicators::candlestick::{min_data, IndicatorState, INFO};
 
 use crate::utils::{info_to_object, inputs_to_array, js_pair, map_error, InfoObject};
-
-const IW: usize = rust_cdl::INPUTS_WIDTH;
-const OW: usize = rust_cdl::OPTIONS_WIDTH;
 
 // ── ForecastType string enum ────────────────────────────────────────────────────
 
@@ -73,7 +71,7 @@ fn convert_patterns(raw: Vec<Option<Vec<CandlePattern>>>) -> Vec<Option<Vec<Cand
 
 #[napi]
 pub struct CandlestickState {
-    pub(crate) inner: rust_cdl::IndicatorState,
+    pub(crate) inner: IndicatorState,
 }
 
 #[napi]
@@ -86,7 +84,7 @@ impl CandlestickState {
         inputs: Vec<Float64Array>,
         forecast_type: Option<ForecastType>,
     ) -> Result<Vec<Option<Vec<CandlePatternObject>>>> {
-        let input_arr = inputs_to_array::<IW>(&inputs)?;
+        let input_arr = inputs_to_array::<4>(&inputs)?;
         let raw = self
             .inner
             .batch_indicator(&input_arr, forecast_type.map(to_rust_forecast))
@@ -105,7 +103,7 @@ impl CandlestickState {
     /// Restore state from a `Buffer` produced by `toBuffer()`.
     #[napi(factory)]
     pub fn from_buffer(buf: Buffer) -> Result<Self> {
-        bincode::deserialize::<rust_cdl::IndicatorState>(buf.as_ref())
+        bincode::deserialize::<IndicatorState>(buf.as_ref())
             .map(|inner| Self { inner })
             .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
     }
@@ -120,7 +118,7 @@ impl CandlestickState {
     /// Restore state from a JSON string produced by `toJson()`.
     #[napi(factory)]
     pub fn from_json(json: String) -> Result<Self> {
-        serde_json::from_str::<rust_cdl::IndicatorState>(&json)
+        serde_json::from_str::<IndicatorState>(&json)
             .map(|inner| Self { inner })
             .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
     }
@@ -139,15 +137,18 @@ pub fn candlestick_indicator(
     options: Vec<f64>,
     forecast_type: Option<ForecastType>,
 ) -> Result<JsObject> {
-    let input_arr = inputs_to_array::<IW>(&inputs)?;
+    let input_arr = inputs_to_array::<4>(&inputs)?;
 
-    let option_arr: [f64; OW] = options
+    let option_arr: [f64; 3] = options
         .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected 3 options")))?;
 
-    let (raw_patterns, inner) =
-        rust_cdl::indicator(&input_arr, &option_arr, forecast_type.map(to_rust_forecast))
-            .map_err(map_error)?;
+    let (raw_patterns, inner) = tulip_rs::indicators::candlestick::indicator(
+        &input_arr,
+        &option_arr,
+        forecast_type.map(to_rust_forecast),
+    )
+    .map_err(map_error)?;
 
     let patterns = convert_patterns(raw_patterns);
     js_pair(&env, patterns, CandlestickState { inner })
@@ -156,13 +157,11 @@ pub fn candlestick_indicator(
 /// Static metadata for the candlestick indicator.
 #[napi]
 pub fn candlestick_info() -> InfoObject {
-    info_to_object(rust_cdl::INFO)
+    info_to_object(INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.
 #[napi]
 pub fn candlestick_min_data(options: Vec<f64>) -> u32 {
-    rust_cdl::min_data(&options) as u32
+    min_data(&options) as u32
 }
-
-// candlestick does not expose min_data_accuracy (not present in tulip_rs for this indicator)

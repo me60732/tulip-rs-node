@@ -1,21 +1,20 @@
 use napi::bindgen_prelude::*;
 use napi::{Env, JsObject};
 use napi_derive::napi;
-use tulip_rs::indicator_types::TIndicatorState as _;
-use tulip_rs::indicators::cybercycle as rust_cybercycle;
+
+use tulip_rs::indicators::cybercycle::{
+    Cybercycle, Indicator, IndicatorByOptions, IndicatorState, TIndicatorState, INPUTS, OPTIONS,
+};
 
 use crate::utils::{
     info_to_object, inputs_to_array, js_pair, map_error, vecs_to_float64arrays, InfoObject,
 };
 
-const IW: usize = rust_cybercycle::INPUTS_WIDTH;
-const OW: usize = rust_cybercycle::OPTIONS_WIDTH;
-
 // ── State class ──────────────────────────────────────────────────────────────
 
 #[napi]
 pub struct CybercycleState {
-    pub(crate) inner: rust_cybercycle::IndicatorState,
+    pub(crate) inner: IndicatorState,
 }
 
 #[napi]
@@ -27,7 +26,7 @@ impl CybercycleState {
         inputs: Vec<Float64Array>,
         optional_outputs: Option<Vec<bool>>,
     ) -> Result<Vec<Float64Array>> {
-        let input_arr = inputs_to_array::<IW>(&inputs)?;
+        let input_arr = inputs_to_array::<INPUTS>(&inputs)?;
         let outputs = self
             .inner
             .batch_indicator(&input_arr, optional_outputs.as_deref())
@@ -46,7 +45,7 @@ impl CybercycleState {
     /// Restore state from a `Buffer` produced by `toBuffer()`.
     #[napi(factory)]
     pub fn from_buffer(buf: Buffer) -> Result<Self> {
-        bincode::deserialize::<rust_cybercycle::IndicatorState>(buf.as_ref())
+        bincode::deserialize::<IndicatorState>(buf.as_ref())
             .map(|inner| Self { inner })
             .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
     }
@@ -61,7 +60,7 @@ impl CybercycleState {
     /// Restore state from a JSON string produced by `toJson()`.
     #[napi(factory)]
     pub fn from_json(json: String) -> Result<Self> {
-        serde_json::from_str::<rust_cybercycle::IndicatorState>(&json)
+        serde_json::from_str::<IndicatorState>(&json)
             .map(|inner| Self { inner })
             .map_err(|e| Error::new(Status::InvalidArg, e.to_string()))
     }
@@ -70,8 +69,7 @@ impl CybercycleState {
 // ── Top-level functions ───────────────────────────────────────────────────────
 
 /// Run the Cyber Cycle indicator. Returns `[outputs, state]` as a JS array.
-/// `inputs`: `[[price]]`   `options`: `[alpha]` (Ehlers default 0.07)
-/// Mandatory outputs: `cybercycle` | Optional: `[want_trigger]`
+/// `inputs`: `[[real]]`   `options`: `[alpha]`
 #[napi]
 pub fn cybercycle_indicator(
     env: Env,
@@ -79,14 +77,14 @@ pub fn cybercycle_indicator(
     options: Vec<f64>,
     optional_outputs: Option<Vec<bool>>,
 ) -> Result<JsObject> {
-    let input_arr = inputs_to_array::<IW>(&inputs)?;
+    let input_arr = inputs_to_array::<INPUTS>(&inputs)?;
 
-    let option_arr: [f64; OW] = options
+    let option_arr: [f64; OPTIONS] = options
         .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OPTIONS} options")))?;
 
     let (outputs, inner) =
-        rust_cybercycle::indicator(&input_arr, &option_arr, optional_outputs.as_deref())
+        Cybercycle::indicator(&input_arr, &option_arr, optional_outputs.as_deref())
             .map_err(map_error)?;
     js_pair(
         &env,
@@ -98,15 +96,18 @@ pub fn cybercycle_indicator(
 /// Static metadata for Cyber Cycle.
 #[napi]
 pub fn cybercycle_info() -> InfoObject {
-    info_to_object(rust_cybercycle::INFO)
+    info_to_object(Cybercycle::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.
 #[napi]
 pub fn cybercycle_min_data(options: Vec<f64>) -> u32 {
-    rust_cybercycle::min_data(&options) as u32
+    let option_arr: [f64; OPTIONS] = options
+        .try_into()
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OPTIONS} options")))
+        .unwrap_or([0.0]);
+    Cybercycle::min_data(&option_arr) as u32
 }
-
 
 // ── SIMD — by assets ─────────────────────────────────────────────────────────
 
@@ -128,49 +129,49 @@ pub fn cybercycle_simd_by_assets(
         ));
     }
 
-    let option_arr: [f64; OW] = options
+    let option_arr: [f64; OPTIONS] = options
         .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))?;
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OPTIONS} options")))?;
 
     let asset_vecs: Vec<Vec<&[f64]>> = inputs
         .iter()
         .map(|asset| asset.iter().map(|v| v.as_ref()).collect())
         .collect();
 
-    let input_arrays: Vec<[&[f64]; IW]> = asset_vecs
+    let input_arrays: Vec<[&[f64]; INPUTS]> = asset_vecs
         .iter()
         .map(|a| {
             a.as_slice().try_into().map_err(|_| {
                 Error::new(
                     Status::InvalidArg,
-                    format!("Each asset must have {IW} input series"),
+                    format!("Each asset must have {INPUTS} input series"),
                 )
             })
         })
         .collect::<Result<_>>()?;
 
-    let input_refs: Vec<&[&[f64]; IW]> = input_arrays.iter().collect();
+    let input_refs: Vec<&[&[f64]; INPUTS]> = input_arrays.iter().collect();
 
     let (outs, states_inner) = match n {
-        2 => rust_cybercycle::by_assets::indicator::<2>(
+        2 => Cybercycle::indicator_by_assets::<2>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
             optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
-        4 => rust_cybercycle::by_assets::indicator::<4>(
+        4 => Cybercycle::indicator_by_assets::<4>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
             optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
-        8 => rust_cybercycle::by_assets::indicator::<8>(
+        8 => Cybercycle::indicator_by_assets::<8>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
             optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
-        16 => rust_cybercycle::by_assets::indicator::<16>(
+        16 => Cybercycle::indicator_by_assets::<16>(
             input_refs.as_slice().try_into().unwrap(),
             &option_arr,
             optional_outputs.as_deref(),
@@ -189,8 +190,9 @@ pub fn cybercycle_simd_by_assets(
 
 // ── SIMD — by options ────────────────────────────────────────────────────────
 
-/// Run the same asset through Cyber Cycle with N option sets in a single SIMD pass (N = 2 | 4 | 8 | 16).
+/// Run N option-sets against the same Cyber Cycle input in a single SIMD pass (N = 2 | 4 | 8 | 16).
 /// Returns `[outputs, states]` — both JS arrays of length N.
+/// `inputs`: `[[real]]`   `options_list`: `[N][1]`
 #[napi]
 pub fn cybercycle_simd_by_options(
     env: Env,
@@ -205,38 +207,43 @@ pub fn cybercycle_simd_by_options(
             format!("SIMD lane count must be 2, 4, 8, or 16; got {n}"),
         ));
     }
-    let input_arr = inputs_to_array::<IW>(&inputs)?;
-    let option_arrays: Vec<[f64; OW]> = options_list
-        .iter()
+
+    let input_arr = inputs_to_array::<INPUTS>(&inputs)?;
+
+    let option_arrs: Vec<[f64; OPTIONS]> = options_list
+        .into_iter()
         .map(|o| {
-            o.iter()
-                .cloned()
-                .collect::<Vec<_>>()
-                .try_into()
-                .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OW} options")))
+            o.try_into().map_err(|_| {
+                Error::new(
+                    Status::InvalidArg,
+                    format!("Each option set must have {OPTIONS} values"),
+                )
+            })
         })
         .collect::<Result<_>>()?;
-    let option_refs: Vec<&[f64; OW]> = option_arrays.iter().collect();
+
+    let option_refs: Vec<&[f64; OPTIONS]> = option_arrs.iter().collect();
+
     let (outs, states_inner) = match n {
-        2 => rust_cybercycle::by_options::indicator::<2>(
+        2 => Cybercycle::indicator_by_options::<2>(
             &input_arr,
             option_refs.as_slice().try_into().unwrap(),
             optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
-        4 => rust_cybercycle::by_options::indicator::<4>(
+        4 => Cybercycle::indicator_by_options::<4>(
             &input_arr,
             option_refs.as_slice().try_into().unwrap(),
             optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
-        8 => rust_cybercycle::by_options::indicator::<8>(
+        8 => Cybercycle::indicator_by_options::<8>(
             &input_arr,
             option_refs.as_slice().try_into().unwrap(),
             optional_outputs.as_deref(),
         )
         .map_err(map_error)?,
-        16 => rust_cybercycle::by_options::indicator::<16>(
+        16 => Cybercycle::indicator_by_options::<16>(
             &input_arr,
             option_refs.as_slice().try_into().unwrap(),
             optional_outputs.as_deref(),
@@ -244,6 +251,7 @@ pub fn cybercycle_simd_by_options(
         .map_err(map_error)?,
         _ => unreachable!(),
     };
+
     let states: Vec<CybercycleState> = states_inner
         .into_iter()
         .map(|inner| CybercycleState { inner })
