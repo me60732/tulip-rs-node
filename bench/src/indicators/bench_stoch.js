@@ -31,3 +31,12 @@ export function ref2Fn(data, options) {
     dPeriod: options[2],
   });
 }
+
+export function simdAssetsFn(stocks, options) {
+  const inputs = stocks.map((s) => [s.high, s.low, s.close]);
+  return ti.stoch.simdByAssets(inputs, options);
+}
+
+export function simdOptionsFn(data, optionsList) {
+  return ti.stoch.simdByOptions([data.high, data.low, data.close], optionsList);
+}

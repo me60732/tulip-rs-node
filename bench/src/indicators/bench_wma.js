@@ -11,3 +11,12 @@ export function tulipFn(data, options) {
 export function refFn(data, options) {
   return WMA.calculate({ period: options[0], values: data.close });
 }
+
+export function simdAssetsFn(stocks, options) {
+  const inputs = stocks.map((s) => [s.close]);
+  return ti.wma.simdByAssets(inputs, options);
+}
+
+export function simdOptionsFn(data, optionsList) {
+  return ti.wma.simdByOptions([data.close], optionsList);
+}

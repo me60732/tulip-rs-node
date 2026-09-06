@@ -9,3 +9,8 @@ export function tulipFn(data, _options) {
 
 export const refFn = null;
 export const ref2Fn = null;
+
+export function simdAssetsFn(stocks, _options) {
+  const inputs = stocks.map((s) => [s.high, s.low, s.volume]);
+  return ti.marketfi.simdByAssets(inputs, []);
+}

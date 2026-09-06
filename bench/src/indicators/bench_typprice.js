@@ -13,3 +13,8 @@ export const refFn = null;
 export function ref2Fn(data, _options) {
   return typprice(data.high, data.low, data.close);
 }
+
+export function simdAssetsFn(stocks, _options) {
+  const inputs = stocks.map((s) => [s.high, s.low, s.close]);
+  return ti.typprice.simdByAssets(inputs, []);
+}

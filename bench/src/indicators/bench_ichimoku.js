@@ -20,3 +20,12 @@ export function refFn(data, options) {
 }
 
 export const ref2Fn = null;
+
+export function simdAssetsFn(stocks, options) {
+  const inputs = stocks.map((s) => [s.high, s.low, s.close]);
+  return ti.ichimoku.simdByAssets(inputs, options);
+}
+
+export function simdOptionsFn(data, optionsList) {
+  return ti.ichimoku.simdByOptions([data.high, data.low, data.close], optionsList);
+}

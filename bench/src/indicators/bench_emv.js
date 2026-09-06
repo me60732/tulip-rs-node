@@ -14,3 +14,8 @@ export const refFn = null;
 export function ref2Fn(data, _options) {
   return emv(data.high, data.low, data.volume);
 }
+
+export function simdAssetsFn(stocks, _options) {
+  const inputs = stocks.map((s) => [s.high, s.low, s.volume]);
+  return ti.emv.simdByAssets(inputs, []);
+}

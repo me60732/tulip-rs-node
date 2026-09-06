@@ -32,3 +32,12 @@ export function ref2Fn(data, options) {
     signal: options[2],
   });
 }
+
+export function simdAssetsFn(stocks, options) {
+  const inputs = stocks.map((s) => [s.close]);
+  return ti.macd.simdByAssets(inputs, options);
+}
+
+export function simdOptionsFn(data, optionsList) {
+  return ti.macd.simdByOptions([data.close], optionsList);
+}

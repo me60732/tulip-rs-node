@@ -31,7 +31,7 @@ const BENCH_DB_URL =
 const LOG_TO_DB = process.env.BENCHMARK_LOG_TO_DB === "1";
 const BENCH_NUMBER = parseInt(process.env.BENCH_NUMBER ?? "10", 10);
 const BENCH_REPEAT = parseInt(process.env.BENCH_REPEAT ?? "500", 10);
-const BENCH_WARMUP = parseInt(process.env.BENCH_WARMUP ?? "50", 10);
+const BENCH_WARMUP = parseInt(process.env.BENCH_WARMUP ?? "500", 10);
 const DATA_LIMIT = 6705; // same row-count as Rust benchmarks
 const STOCKS = [
   ["BHP", "ASX"],
@@ -327,6 +327,48 @@ async function runBenchmark(defn, stocks, logger) {
             inputSize: data.length,
           });
         }
+      }
+    }
+  }
+
+  if (defn.simdAssetsFn != null) {
+    for (const options of defn.optionsList) {
+      const simdTiming = timeFn(() => defn.simdAssetsFn(stocks, options));
+      const symbol = `ALL_${stocks.length}_ASSETS`;
+      _printRow("simd_by_assets", symbol, options, simdTiming);
+      if (logger) {
+        await logger.log({
+          indicatorName: defn.name,
+          implType: "tulip_rs_node_simd_by_assets",
+          options,
+          timing: simdTiming,
+          symbol,
+          inputSize: stocks[0].length,
+        });
+      }
+    }
+  }
+
+  if (defn.simdOptionsFn != null) {
+    for (const data of stocks) {
+      const simdTiming = timeFn(() =>
+        defn.simdOptionsFn(data, defn.optionsList),
+      );
+      _printRow(
+        "simd_by_options",
+        data.symbol,
+        [defn.optionsList.length],
+        simdTiming,
+      );
+      if (logger) {
+        await logger.log({
+          indicatorName: defn.name,
+          implType: "tulip_rs_node_simd_by_options",
+          options: [defn.optionsList.length],
+          timing: simdTiming,
+          symbol: data.symbol,
+          inputSize: data.length,
+        });
       }
     }
   }

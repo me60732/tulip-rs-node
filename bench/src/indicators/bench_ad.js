@@ -21,3 +21,8 @@ export function refFn(data, _options) {
 export function ref2Fn(data, _options) {
   return ad(data.high, data.low, data.close, data.volume);
 }
+
+export function simdAssetsFn(stocks, _options) {
+  const inputs = stocks.map((s) => [s.high, s.low, s.close, s.volume]);
+  return ti.ad.simdByAssets(inputs, []);
+}

@@ -18,3 +18,8 @@ export function refFn(data, options) {
 }
 
 export const ref2Fn = null;
+
+export function simdAssetsFn(stocks, _options) {
+  const inputs = stocks.map((s) => [s.high, s.low, s.close, s.volume]);
+  return ti.vwap.simdByAssets(inputs, []);
+}

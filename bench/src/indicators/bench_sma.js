@@ -16,3 +16,12 @@ export function refFn(data, options) {
 export function ref2Fn(data, options) {
   return sma(data.close, { period: options[0] });
 }
+
+export function simdAssetsFn(stocks, options) {
+  const inputs = stocks.map((s) => [s.close]);
+  return ti.sma.simdByAssets(inputs, options);
+}
+
+export function simdOptionsFn(data, optionsList) {
+  return ti.sma.simdByOptions([data.close], optionsList);
+}

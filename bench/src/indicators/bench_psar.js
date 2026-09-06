@@ -29,3 +29,12 @@ export function ref2Fn(data, options) {
     max: options[1],
   });
 }
+
+export function simdAssetsFn(stocks, options) {
+  const inputs = stocks.map((s) => [s.high, s.low]);
+  return ti.psar.simdByAssets(inputs, options);
+}
+
+export function simdOptionsFn(data, optionsList) {
+  return ti.psar.simdByOptions([data.high, data.low], optionsList);
+}

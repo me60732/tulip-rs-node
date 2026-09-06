@@ -15,3 +15,12 @@ export const refFn = null;
 export function ref2Fn(data, options) {
   return ppo(data.close, { fast: options[0], slow: options[1] });
 }
+
+export function simdAssetsFn(stocks, options) {
+  const inputs = stocks.map((s) => [s.close]);
+  return ti.ppo.simdByAssets(inputs, options);
+}
+
+export function simdOptionsFn(data, optionsList) {
+  return ti.ppo.simdByOptions([data.close], optionsList);
+}

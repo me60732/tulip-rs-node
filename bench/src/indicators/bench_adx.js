@@ -11,3 +11,12 @@ export function tulipFn(data, options) {
 export function refFn(data, options) {
   return ADX.calculate({ period: options[0], high: data.high, low: data.low, close: data.close });
 }
+
+export function simdAssetsFn(stocks, options) {
+  const inputs = stocks.map((s) => [s.high, s.low, s.close]);
+  return ti.adx.simdByAssets(inputs, options);
+}
+
+export function simdOptionsFn(data, optionsList) {
+  return ti.adx.simdByOptions([data.high, data.low, data.close], optionsList);
+}

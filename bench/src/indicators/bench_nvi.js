@@ -13,3 +13,8 @@ export const refFn = null;
 export function ref2Fn(data, _options) {
   return nvi(data.close, data.volume);
 }
+
+export function simdAssetsFn(stocks, _options) {
+  const inputs = stocks.map((s) => [s.close, s.volume]);
+  return ti.nvi.simdByAssets(inputs, []);
+}

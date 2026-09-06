@@ -9,3 +9,12 @@ export function tulipFn(data, options) {
 
 export const refFn = null;
 export const ref2Fn = null;
+
+export function simdAssetsFn(stocks, options) {
+  const inputs = stocks.map((s) => [s.close]);
+  return ti.zlema.simdByAssets(inputs, options);
+}
+
+export function simdOptionsFn(data, optionsList) {
+  return ti.zlema.simdByOptions([data.close], optionsList);
+}

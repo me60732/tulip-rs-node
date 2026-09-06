@@ -17,3 +17,12 @@ export function refFn(data, options) {
     values: data.close,
   });
 }
+
+export function simdAssetsFn(stocks, options) {
+  const inputs = stocks.map((s) => [s.close]);
+  return ti.stochrsi.simdByAssets(inputs, options);
+}
+
+export function simdOptionsFn(data, optionsList) {
+  return ti.stochrsi.simdByOptions([data.close], optionsList);
+}

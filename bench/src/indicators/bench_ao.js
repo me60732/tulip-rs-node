@@ -21,3 +21,8 @@ export function refFn(data, _options) {
 export function ref2Fn(data, _options) {
   return ao(data.high, data.low);
 }
+
+export function simdAssetsFn(stocks, _options) {
+  const inputs = stocks.map((s) => [s.high, s.low]);
+  return ti.ao.simdByAssets(inputs, []);
+}
