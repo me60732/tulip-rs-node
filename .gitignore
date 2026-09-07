@@ -35,3 +35,8 @@ yarn-error.log*
 # Environment
 .env
 .env.local
+
+# -------------------------
+# Rust build config (local only)
+# -------------------------
+.cargo/config.toml

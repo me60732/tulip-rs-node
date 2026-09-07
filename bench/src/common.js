@@ -128,6 +128,11 @@ async function loadStockData() {
 /**
  * Writes timing results to the indicator_benchmark PostgreSQL database.
  *
+ * The DB lives on a remote network host, so a run of hundreds of log()
+ * calls can hit a transient dropped connection. On connection-related errors
+ * we reconnect once and retry once before giving up on that single write —
+ * a dropped result row shouldn't abort the whole benchmark run.
+ *
  * Call order: new BenchmarkLogger() → init() → startRun() → log() × N → close()
  */
 class BenchmarkLogger {
@@ -137,10 +142,73 @@ class BenchmarkLogger {
     this._cache = {}; // indicator name → id
   }
 
+  /** Reconnect to the database by ending the current pool and creating a new one. */
+  async _reconnect() {
+    try {
+      await this.pool.end();
+    } catch (err) {
+      // Ignore errors during shutdown; we're reconnecting anyway.
+    }
+    this.pool = new Pool({ connectionString: BENCH_DB_URL });
+  }
+
+  /** Run fn() against the DB; on connection loss, reconnect and retry once. */
+  async _withRetry(label, fn) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (!this._isConnectionError(err)) {
+        throw err;
+      }
+      console.warn(
+        `[warn] ${label}: connection error (${err.message || err}); reconnecting and retrying once`,
+      );
+      try {
+        await this._reconnect();
+      } catch (reconnectErr) {
+        console.warn(
+          `[warn] ${label}: reconnect failed (${reconnectErr.message || reconnectErr}); skipping this write`,
+        );
+        return undefined;
+      }
+      try {
+        return await fn();
+      } catch (retryErr) {
+        if (!this._isConnectionError(retryErr)) {
+          throw retryErr;
+        }
+        console.warn(
+          `[warn] ${label}: retry failed (${retryErr.message || retryErr}); skipping this write`,
+        );
+        return undefined;
+      }
+    }
+  }
+
+  /** Check if an error looks like a connection-related error for pg. */
+  _isConnectionError(err) {
+    if (!err) return false;
+    const code = err.code || "";
+    const message = (err.message || "").toLowerCase();
+    // Common pg connection error patterns
+    return (
+      code === "ECONNRESET" ||
+      code === "ECONNREFUSED" ||
+      code === "ENOTFOUND" ||
+      message.includes("connection terminated") ||
+      message.includes("server closed the connection unexpectedly") ||
+      message.includes("terminated unexpectedly") ||
+      message.includes("closed") ||
+      message.includes("pool is disconnected")
+    );
+  }
+
   /** Populate the name→id cache from the indicators table. */
   async init() {
-    const { rows } = await this.pool.query("SELECT id, name FROM indicators");
-    for (const { id, name } of rows) this._cache[name] = id;
+    await this._withRetry("init", async () => {
+      const { rows } = await this.pool.query("SELECT id, name FROM indicators");
+      for (const { id, name } of rows) this._cache[name] = id;
+    });
   }
 
   /** Create a new benchmark_runs row and store the returned id. */
@@ -153,11 +221,13 @@ class BenchmarkLogger {
       hostname: os.hostname(),
       node_version: process.version,
     };
-    const { rows } = await this.pool.query(
-      "INSERT INTO benchmark_runs (notes, system_info) VALUES ($1, $2) RETURNING id",
-      [notes, JSON.stringify(systemInfo)],
-    );
-    this.runId = rows[0].id;
+    await this._withRetry("startRun", async () => {
+      const { rows } = await this.pool.query(
+        "INSERT INTO benchmark_runs (notes, system_info) VALUES ($1, $2) RETURNING id",
+        [notes, JSON.stringify(systemInfo)],
+      );
+      this.runId = rows[0].id;
+    });
     console.log(`  benchmark run id: ${this.runId}`);
   }
 
@@ -180,26 +250,28 @@ class BenchmarkLogger {
       );
       return;
     }
-    await this.pool.query(
-      `INSERT INTO benchmark_results
-         (run_id, indicator_id, implementation_type, stock_symbol,
-          data_source, options, mean_time_ns, std_dev_ns,
-          min_time_ns, max_time_ns, sample_count, input_size)
-       VALUES ($1,$2,$3,$4,'real_data',$5,$6,$7,$8,$9,$10,$11)`,
-      [
-        this.runId,
-        iid,
-        implType,
-        symbol,
-        JSON.stringify(options),
-        timing.mean_ns,
-        timing.stddev_ns,
-        timing.min_ns,
-        timing.max_ns,
-        timing.sample_count,
-        inputSize,
-      ],
-    );
+    await this._withRetry(`log(${indicatorName}/${implType}/${symbol})`, async () => {
+      await this.pool.query(
+        `INSERT INTO benchmark_results
+           (run_id, indicator_id, implementation_type, stock_symbol,
+            data_source, options, mean_time_ns, std_dev_ns,
+            min_time_ns, max_time_ns, sample_count, input_size)
+         VALUES ($1,$2,$3,$4,'real_data',$5,$6,$7,$8,$9,$10,$11)`,
+        [
+          this.runId,
+          iid,
+          implType,
+          symbol,
+          JSON.stringify(options),
+          timing.mean_ns,
+          timing.stddev_ns,
+          timing.min_ns,
+          timing.max_ns,
+          timing.sample_count,
+          inputSize,
+        ],
+      );
+    });
   }
 
   async close() {

@@ -2,7 +2,9 @@ use napi::bindgen_prelude::*;
 use napi::{Env, JsObject};
 use napi_derive::napi;
 use tulip_rs::indicator_types::TIndicatorState as _;
-use tulip_rs::indicators::pivotpoint::{indicator, min_data, IndicatorState, INFO};
+use tulip_rs::indicators::pivotpoint::{
+    Indicator, IndicatorByOptions, IndicatorState, PivotPoint, INPUTS, OPTIONS,
+};
 
 use crate::utils::{
     info_to_object, inputs_to_array, js_pair, map_error, vecs_to_float64arrays, InfoObject,
@@ -24,7 +26,7 @@ impl PivotpointState {
         inputs: Vec<Float64Array>,
         optional_outputs: Option<Vec<bool>>,
     ) -> Result<Vec<Float64Array>> {
-        let input_arr = inputs_to_array::<3>(&inputs)?;
+        let input_arr = inputs_to_array::<INPUTS>(&inputs)?;
         let outputs = self
             .inner
             .batch_indicator(&input_arr, optional_outputs.as_deref())
@@ -75,14 +77,15 @@ pub fn pivotpoint_indicator(
     options: Vec<f64>,
     optional_outputs: Option<Vec<bool>>,
 ) -> Result<JsObject> {
-    let input_arr = inputs_to_array::<3>(&inputs)?;
+    let input_arr = inputs_to_array::<INPUTS>(&inputs)?;
 
-    let option_arr: [f64; 1] = options
+    let option_arr: [f64; OPTIONS] = options
         .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected 1 options")))?;
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OPTIONS} options")))?;
 
     let (outputs, inner) =
-        indicator(&input_arr, &option_arr, optional_outputs.as_deref()).map_err(map_error)?;
+        PivotPoint::indicator(&input_arr, &option_arr, optional_outputs.as_deref())
+            .map_err(map_error)?;
     js_pair(
         &env,
         vecs_to_float64arrays(outputs),
@@ -93,15 +96,166 @@ pub fn pivotpoint_indicator(
 /// Static metadata for PivotPoint.
 #[napi]
 pub fn pivotpoint_info() -> InfoObject {
-    info_to_object(INFO)
+    info_to_object(PivotPoint::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.
 #[napi]
 pub fn pivotpoint_min_data(options: Vec<f64>) -> u32 {
-    let option_arr: [f64; 1] = options
+    let option_arr: [f64; OPTIONS] = options
         .try_into()
-        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected 1 options")))
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OPTIONS} options")))
         .unwrap();
-    min_data(&option_arr) as u32
+    PivotPoint::min_data(&option_arr) as u32
+}
+
+// ── SIMD — by assets ─────────────────────────────────────────────────────────
+
+/// Run N assets through PivotPoint in a single SIMD pass (N = 2 | 4 | 8 | 16).
+/// Returns `[outputs, states]` — both JS arrays of length N.
+/// `inputs` shape: `[N][3][data_len]`
+#[napi]
+pub fn pivotpoint_simd_by_assets(
+    env: Env,
+    inputs: Vec<Vec<Float64Array>>,
+    options: Vec<f64>,
+    optional_outputs: Option<Vec<bool>>,
+) -> Result<JsObject> {
+    let n = inputs.len();
+    if !matches!(n, 2 | 4 | 8 | 16) {
+        return Err(Error::new(
+            Status::InvalidArg,
+            format!("SIMD lane count must be 2, 4, 8, or 16; got {n}"),
+        ));
+    }
+
+    let option_arr: [f64; OPTIONS] = options
+        .try_into()
+        .map_err(|_| Error::new(Status::InvalidArg, format!("Expected {OPTIONS} options")))?;
+
+    let asset_vecs: Vec<Vec<&[f64]>> = inputs
+        .iter()
+        .map(|asset| asset.iter().map(|v| v.as_ref()).collect())
+        .collect();
+
+    let input_arrays: Vec<[&[f64]; INPUTS]> = asset_vecs
+        .iter()
+        .map(|a| {
+            a.as_slice().try_into().map_err(|_| {
+                Error::new(
+                    Status::InvalidArg,
+                    format!("Each asset must have {INPUTS} input series"),
+                )
+            })
+        })
+        .collect::<Result<_>>()?;
+
+    let input_refs: Vec<&[&[f64]; INPUTS]> = input_arrays.iter().collect();
+
+    let (outs, states_inner) = match n {
+        2 => PivotPoint::indicator_by_assets::<2>(
+            input_refs.as_slice().try_into().unwrap(),
+            &option_arr,
+            optional_outputs.as_deref(),
+        )
+        .map_err(map_error)?,
+        4 => PivotPoint::indicator_by_assets::<4>(
+            input_refs.as_slice().try_into().unwrap(),
+            &option_arr,
+            optional_outputs.as_deref(),
+        )
+        .map_err(map_error)?,
+        8 => PivotPoint::indicator_by_assets::<8>(
+            input_refs.as_slice().try_into().unwrap(),
+            &option_arr,
+            optional_outputs.as_deref(),
+        )
+        .map_err(map_error)?,
+        16 => PivotPoint::indicator_by_assets::<16>(
+            input_refs.as_slice().try_into().unwrap(),
+            &option_arr,
+            optional_outputs.as_deref(),
+        )
+        .map_err(map_error)?,
+        _ => unreachable!(),
+    };
+
+    let states: Vec<PivotpointState> = states_inner
+        .into_iter()
+        .map(|inner| PivotpointState { inner })
+        .collect();
+    let js_outs: Vec<Vec<Float64Array>> = outs.into_iter().map(vecs_to_float64arrays).collect();
+    js_pair(&env, js_outs, states)
+}
+
+// ── SIMD — by options ────────────────────────────────────────────────────────
+
+/// Run N option-sets against the same PivotPoint input in a single SIMD pass (N = 2 | 4 | 8 | 16).
+/// Returns `[outputs, states]` — both JS arrays of length N.
+/// `inputs`: `[[high, low, close]]`   `options_list`: `[N][1]`
+#[napi]
+pub fn pivotpoint_simd_by_options(
+    env: Env,
+    inputs: Vec<Float64Array>,
+    options_list: Vec<Vec<f64>>,
+    optional_outputs: Option<Vec<bool>>,
+) -> Result<JsObject> {
+    let n = options_list.len();
+    if !matches!(n, 2 | 4 | 8 | 16) {
+        return Err(Error::new(
+            Status::InvalidArg,
+            format!("SIMD lane count must be 2, 4, 8, or 16; got {n}"),
+        ));
+    }
+
+    let input_arr = inputs_to_array::<INPUTS>(&inputs)?;
+
+    let option_arrs: Vec<[f64; OPTIONS]> = options_list
+        .into_iter()
+        .map(|o| {
+            o.try_into().map_err(|_| {
+                Error::new(
+                    Status::InvalidArg,
+                    format!("Each option set must have {OPTIONS} values"),
+                )
+            })
+        })
+        .collect::<Result<_>>()?;
+
+    let option_refs: Vec<&[f64; OPTIONS]> = option_arrs.iter().collect();
+
+    let (outs, states_inner) = match n {
+        2 => PivotPoint::indicator_by_options::<2>(
+            &input_arr,
+            option_refs.as_slice().try_into().unwrap(),
+            optional_outputs.as_deref(),
+        )
+        .map_err(map_error)?,
+        4 => PivotPoint::indicator_by_options::<4>(
+            &input_arr,
+            option_refs.as_slice().try_into().unwrap(),
+            optional_outputs.as_deref(),
+        )
+        .map_err(map_error)?,
+        8 => PivotPoint::indicator_by_options::<8>(
+            &input_arr,
+            option_refs.as_slice().try_into().unwrap(),
+            optional_outputs.as_deref(),
+        )
+        .map_err(map_error)?,
+        16 => PivotPoint::indicator_by_options::<16>(
+            &input_arr,
+            option_refs.as_slice().try_into().unwrap(),
+            optional_outputs.as_deref(),
+        )
+        .map_err(map_error)?,
+        _ => unreachable!(),
+    };
+
+    let states: Vec<PivotpointState> = states_inner
+        .into_iter()
+        .map(|inner| PivotpointState { inner })
+        .collect();
+    let js_outs: Vec<Vec<Float64Array>> = outs.into_iter().map(vecs_to_float64arrays).collect();
+    js_pair(&env, js_outs, states)
 }

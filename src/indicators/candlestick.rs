@@ -4,7 +4,7 @@ use napi_derive::napi;
 
 use tulip_rs::candle_indicators::candle_patterns::CandlePattern;
 use tulip_rs::candle_indicators::types::ForecastType as RustForecastType;
-use tulip_rs::indicators::candlestick::{min_data, IndicatorState, INFO};
+use tulip_rs::indicators::candlestick::{CandleStick, IndicatorState};
 
 use crate::utils::{info_to_object, inputs_to_array, js_pair, map_error, InfoObject};
 
@@ -143,12 +143,9 @@ pub fn candlestick_indicator(
         .try_into()
         .map_err(|_| Error::new(Status::InvalidArg, format!("Expected 3 options")))?;
 
-    let (raw_patterns, inner) = tulip_rs::indicators::candlestick::indicator(
-        &input_arr,
-        &option_arr,
-        forecast_type.map(to_rust_forecast),
-    )
-    .map_err(map_error)?;
+    let (raw_patterns, inner) =
+        CandleStick::indicator(&input_arr, &option_arr, forecast_type.map(to_rust_forecast))
+            .map_err(map_error)?;
 
     let patterns = convert_patterns(raw_patterns);
     js_pair(&env, patterns, CandlestickState { inner })
@@ -157,11 +154,11 @@ pub fn candlestick_indicator(
 /// Static metadata for the candlestick indicator.
 #[napi]
 pub fn candlestick_info() -> InfoObject {
-    info_to_object(INFO)
+    info_to_object(CandleStick::INFO)
 }
 
 /// Minimum number of input bars needed to produce at least one output bar.
 #[napi]
 pub fn candlestick_min_data(options: Vec<f64>) -> u32 {
-    min_data(&options) as u32
+    CandleStick::min_data(&options) as u32
 }
