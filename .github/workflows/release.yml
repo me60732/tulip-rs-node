@@ -32,8 +32,15 @@ jobs:
         with:
           node-version: 22
 
-      - uses: dtolnay/rust-toolchain@nightly
+      # Pinned to match rust-toolchain.toml exactly. Using the generic
+      # `@nightly` alias here would install the latest nightly and add the
+      # target to it, but cargo/napi actually use whatever toolchain
+      # rust-toolchain.toml specifies — if the two ever diverge, the target
+      # ends up installed on the wrong toolchain and builds fail with
+      # "can't find crate for `std`".
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: nightly-2026-08-30
           targets: ${{ matrix.target }}
 
       # Git for Windows ships its own tar.exe which hangs when rust-cache tries
