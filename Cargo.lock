@@ -22,9 +22,9 @@ dependencies = [
 
 [[package]]
 name = "bitflags"
-version = "2.13.1"
+version = "2.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b588b76d00fde79687d7646a9b5bdf3cc0f655e0bbd080335a95d7e96f3587da"
+checksum = "3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06"
 
 [[package]]
 name = "cfg-if"
@@ -88,9 +88,9 @@ dependencies = [
 
 [[package]]
 name = "napi-build"
-version = "2.4.1"
+version = "2.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60fdf9b392c50e7c4170fa633bd909490ed7835cea4c046776d1a4dd8d2ae0ab"
+checksum = "860e7c40864f95cfb83cde99f9ebadd88ef3d9bdccd7dd2cee0cc96a2dd4ffa7"
 
 [[package]]
 name = "napi-derive"
@@ -256,9 +256,9 @@ dependencies = [
 
 [[package]]
 name = "tulip_rs"
-version = "0.2.6"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fe9248e768407e3e0c5ff458b842522e3468fe29763538fb01ce35a4cc02a8c"
+checksum = "27d9db60922c1cb5d3ed1d949f9036aae4dff1329406c2d654c0cb9c487fc099"
 dependencies = [
  "serde",
  "serde_json",
@@ -280,7 +280,7 @@ dependencies = [
 
 [[package]]
 name = "tulip_rs_node"
-version = "0.2.6"
+version = "0.2.7"
 dependencies = [
  "bincode",
  "napi",
