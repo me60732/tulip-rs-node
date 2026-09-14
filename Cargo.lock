@@ -256,9 +256,9 @@ dependencies = [
 
 [[package]]
 name = "tulip_rs"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "27d9db60922c1cb5d3ed1d949f9036aae4dff1329406c2d654c0cb9c487fc099"
+checksum = "6804b84a3be41e48e0e00253cc8e79b60ff5b5fbd34a90dbba10c5487f49c01b"
 dependencies = [
  "serde",
  "serde_json",
@@ -280,7 +280,7 @@ dependencies = [
 
 [[package]]
 name = "tulip_rs_node"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "bincode",
  "napi",

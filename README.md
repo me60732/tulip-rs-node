@@ -30,24 +30,34 @@ Full API documentation: [me60732.github.io/tulip_rs](https://me60732.github.io/t
 
 ## Installation
 
+### Build from source (recommended)
+
+Requires Rust nightly (pinned via `rust-toolchain.toml`) and
+[`@napi-rs/cli`](https://napi.rs/docs/introduction/getting-started).
+
+Building on your own machine with `-C target-cpu=native` lets LLVM use every
+instruction set your CPU supports — a substantial speed-up across both the
+scalar and SIMD indicator paths, well beyond the generic prebuilt binaries:
+
+```bash
+git clone https://github.com/me60732/tulip_rs_node
+cd tulip_rs_node
+git checkout {latest tag}   # or omit for the bleeding edge — see the repo's tags page
+npm install
+RUSTFLAGS="-C target-cpu=native" npm run build
+```
+
+### From npm
+
+Use this when the deployment target architecture is unknown or a Rust
+toolchain can't run there:
+
 ```bash
 npm install tulip-rs-node
 ```
 
 > Prebuilt binaries are provided for Linux x64, macOS x64, and macOS arm64.
 > No Rust toolchain required for end users.
-
-### Build from source
-
-Requires Rust nightly (pinned via `rust-toolchain.toml`) and
-[`@napi-rs/cli`](https://napi.rs/docs/introduction/getting-started).
-
-```bash
-git clone https://github.com/me60732/tulip_rs_node
-cd tulip_rs_node
-npm install
-npm run build
-```
 
 ---
 
