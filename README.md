@@ -23,12 +23,12 @@ Full API documentation: [me60732.github.io/tulip_rs](https://me60732.github.io/t
 
 `tulip-rs-node` brings native Rust + SIMD performance to Node.js via napi-rs:
 
-- **~46× faster than `technicalindicators`** (median across 41 indicators),
-  up to **403× faster** (`wma`)
-- **~4.5× faster than `indicatorts`** (pure TypeScript)
+- **~46×** faster than `technicalindicators` (median across 41 indicators),
+  up to **403×** (`wma`)
+- **~4.5×** faster than `indicatorts` (pure TypeScript)
 - Candlestick pattern scanning (81 patterns, single pass): **2.9 ms** vs
-  **107 ms** with `technicalindicators` — **36.83× faster**
-- Adds only **~4–25 µs** of fixed per-call overhead on top of native Rust computation
+  **107 ms** with `technicalindicators` — **36.83×** faster
+- Adds only ~4–25 µs of fixed per-call overhead on top of native Rust computation
 
 📊 **[Full Node.js binding benchmarks](https://me60732.github.io/tulip_rs/benchmarks/node/)**
 
