@@ -1,11 +1,12 @@
 {
   "name": "tulip-rs-node",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Node.js native bindings for tulip_rs — Technical Analysis Library",
   "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
   "license": "MIT",
+  "keywords": ["technical-analysis", "trading", "finance", "indicators", "napi-rs", "native-addon"],
   "repository": {
     "type": "git",
     "url": "https://github.com/me60732/tulip-rs-node"
