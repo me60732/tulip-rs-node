@@ -27,7 +27,7 @@ sub-package with its own `package.json`, mirroring the Python bench at
 
 ```bash
 cd ..                   # tulip_rs_node/
-npm run build           # compiles Rust + TypeScript
+RUSTFLAGS="-C target-cpu=native" npm run build           # compiles Rust + TypeScript
 ```
 
 ### 2. Install bench dependencies
